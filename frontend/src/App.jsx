@@ -1,9 +1,16 @@
+import React from 'react';
+import Navbar from './components/layout/Navbar/Navbar';
+import Footer from './components/layout/Footer/Footer';
+import AppRoutes from './routes/AppRoutes';
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900">
-      <h1 className="text-4xl font-bold text-green-400">
-        Tailwind is working 🚀
-      </h1>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow">
+        <AppRoutes />
+      </main>
+      <Footer />
     </div>
   );
 }
