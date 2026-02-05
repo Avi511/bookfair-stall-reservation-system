@@ -48,7 +48,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     private Set<Genre> genres = new HashSet<>();
-    public void addGenre(Genre genre) {genres.add(genre);};
+    public void addGenre(Genre genre) {genres.add(genre);}
 
     @PrePersist
     protected void onCreate() {
