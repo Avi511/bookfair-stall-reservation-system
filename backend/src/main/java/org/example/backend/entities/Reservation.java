@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -43,5 +41,10 @@ public class Reservation {
     public void addStall(Stall stall) {
         stalls.add(stall);
         stall.setIsReserved(true);
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.reservationDate = LocalDateTime.now();
     }
 }
