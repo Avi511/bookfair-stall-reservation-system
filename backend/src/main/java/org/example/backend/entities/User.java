@@ -1,13 +1,11 @@
 package org.example.backend.entities;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
 
 @Entity
 @Getter
@@ -37,9 +35,6 @@ public class User {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @OneToOne(mappedBy = "user")
-    private Reservation reservation;
 
     @ManyToMany
     @JoinTable(
