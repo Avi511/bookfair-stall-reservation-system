@@ -36,15 +36,6 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_genres",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
-    )
-    private Set<Genre> genres = new HashSet<>();
-    public void addGenre(Genre genre) {genres.add(genre);}
-
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

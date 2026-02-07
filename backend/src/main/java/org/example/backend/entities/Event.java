@@ -39,4 +39,9 @@ public class Event {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        if (this.status == null) this.status = EventStatus.ACTIVE;
+    }
 }

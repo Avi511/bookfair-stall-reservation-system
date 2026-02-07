@@ -24,9 +24,6 @@ public class Stall {
     @Column(name = "size")
     private Size size;
 
-    @Column(name = "is_reserved")
-    private Boolean isReserved;
-
     @Column(name = "x_position")
     private int xPosition;
 
