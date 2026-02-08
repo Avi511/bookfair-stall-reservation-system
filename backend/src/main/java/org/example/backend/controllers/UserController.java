@@ -7,6 +7,7 @@ import org.example.backend.dtos.ChangePasswordRequest;
 import org.example.backend.dtos.RegisterUserRequest;
 import org.example.backend.dtos.UpdateUserRequest;
 import org.example.backend.dtos.UserDto;
+import org.example.backend.entities.Role;
 import org.example.backend.mappers.UserMapper;
 import org.example.backend.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -57,6 +58,7 @@ public class UserController {
 
         var user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
         userRepository.save(user);
 
         var userDto = userMapper.toDto(user);
