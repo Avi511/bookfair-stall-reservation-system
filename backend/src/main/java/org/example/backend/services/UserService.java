@@ -1,4 +1,4 @@
-package org.example.backend.service;
+package org.example.backend.services;
 
 import lombok.AllArgsConstructor;
 import org.example.backend.repositories.UserRepository;
