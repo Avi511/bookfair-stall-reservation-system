@@ -3,13 +3,100 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #005461;
-  --color-secondary: #018790;
-  --color-accent: #00B7B5;
-  --color-background: #F4F4F4;
+  /* Professional brand palette */
+  --color-primary: #0f172a; /* deep slate/navy for headers/nav */
+  --color-secondary: #1d4ed8; /* indigo 700 for CTAs */
+  --color-accent: #00b7b5; /* teal for highlights */
+  --color-background: #f8fafc; /* light neutral background */
+  --color-dark: #0b1220; /* near-black for strong contrast */
+  /* optional derived tokens */
+  --nav-overlay: rgba(15, 23, 42, 0.92);
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Theme presets (Tailwind-inspired, WCAG-friendly) */
+
+/* Indigo (default) */
+[data-theme="indigo"] {
+  --color-primary: #0f172a; /* slate-900 */
+  --color-secondary: #4f46e5; /* indigo-600 */
+  --color-accent: #14b8a6; /* teal-500 */
+  --color-background: #f8fafc; /* slate-50 */
+  --color-dark: #0b1220;
+  --nav-overlay: rgba(15, 23, 42, 0.92);
+}
+
+/* Emerald */
+[data-theme="emerald"] {
+  --color-primary: #052e2b; /* deep teal */
+  --color-secondary: #10b981; /* emerald-500 */
+  --color-accent: #3b82f6; /* blue-500 */
+  --color-background: #f0fdf4; /* emerald-50 */
+  --color-dark: #02201e;
+  --nav-overlay: rgba(5, 46, 43, 0.92);
+}
+
+/* Royal Blue */
+[data-theme="royal"] {
+  --color-primary: #0a1f44; /* royal navy */
+  --color-secondary: #2563eb; /* blue-600 */
+  --color-accent: #f59e0b; /* amber-500 */
+  --color-background: #f9fafb; /* gray-50 */
+  --color-dark: #071733;
+  --nav-overlay: rgba(10, 31, 68, 0.92);
+}
+
+/* Crimson */
+[data-theme="crimson"] {
+  --color-primary: #1f0a12; /* deep plum */
+  --color-secondary: #ef4444; /* red-500 */
+  --color-accent: #22d3ee; /* cyan-400 */
+  --color-background: #fff1f2; /* rose-50 */
+  --color-dark: #16070d;
+  --nav-overlay: rgba(31, 10, 18, 0.92);
+}
+
+/* Animated gradient utility for Navbar (theme-aware via CSS vars) */
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.nav-animated-gradient {
+  background-image: linear-gradient(
+    90deg,
+    var(--color-primary) 0%,
+    var(--color-secondary) 50%,
+    var(--color-accent) 100%
+  );
+  background-size: 200% 200%;
+  animation: gradient-move 12s ease infinite;
+}
+
+/* Message fade/slide animation */
+@keyframes msg-fade-slide {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.message-fade {
+  animation: msg-fade-slide 500ms ease both;
 }

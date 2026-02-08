@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { BookOpen, Menu, X, ChevronRight } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { BookOpen, Menu, X, ChevronRight } from "lucide-react";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
 
   const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
+    { name: "Home", path: "/" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
   ];
 
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 w-full transition-all duration-300 border-b border-white/10 bg-primary/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 w-full transition-all duration-300 border-b border-white/10 backdrop-blur-xl relative">
+      <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-90" />
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-
           {/* Logo Section */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-xl bg-gradient-to-tr from-accent to-secondary group-hover:rotate-6">
@@ -40,12 +40,20 @@ const Navbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`relative px-3 py-2 text-sm font-medium transition-colors duration-300 group ${isActive(link.path) ? 'text-accent' : 'text-gray-100 hover:text-white'
-                  }`}
+                className={`relative px-3 py-2 text-sm font-medium transition-colors duration-300 group ${
+                  isActive(link.path)
+                    ? "text-accent"
+                    : "text-white/80 hover:text-white"
+                }`}
               >
                 {link.name}
-                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-accent transform origin-left transition-transform duration-300 ${isActive(link.path) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                  }`} />
+                <span
+                  className={`absolute bottom-0 left-0 w-full h-0.5 bg-accent transform origin-left transition-transform duration-300 ${
+                    isActive(link.path)
+                      ? "scale-x-100"
+                      : "scale-x-0 group-hover:scale-x-100"
+                  }`}
+                />
               </Link>
             ))}
 
@@ -56,7 +64,8 @@ const Navbar = () => {
             >
               <span className="absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>
               <span className="relative flex items-center gap-2">
-                Reserve Stall <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                Reserve Stall{" "}
+                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           </div>
@@ -67,24 +76,32 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-gray-200 transition-colors rounded-md hover:text-white hover:bg-white/10"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Menu Dropdown */}
-      <div className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="px-4 pt-2 pb-6 space-y-2 border-t bg-primary/95 border-white/10 backdrop-blur-xl">
+      <div
+        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+      >
+        <div className="px-4 pt-2 pb-6 space-y-2 border-t border-white/10 backdrop-blur-xl relative">
+          <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-95" />
           {navLinks.map((link) => (
             <Link
               key={link.path}
               to={link.path}
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`block px-4 py-3 text-base font-medium rounded-lg transition-colors ${isActive(link.path)
-                  ? 'bg-accent/20 text-accent'
-                  : 'text-gray-200 hover:bg-white/5 hover:text-white'
-                }`}
+              className={`block px-4 py-3 text-base font-medium rounded-lg transition-colors ${
+                isActive(link.path)
+                  ? "bg-accent/20 text-accent"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
             >
               {link.name}
             </Link>
