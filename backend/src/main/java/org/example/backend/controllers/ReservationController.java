@@ -48,7 +48,7 @@ public class ReservationController {
 
             for (var stallId : request.getStallIds()) {
                 var stall = stallRepository.findById(stallId).orElse(null);
-                if(stall == null || stall.getIsReserved() == true) {
+                if(stall == null ) {
                     return ResponseEntity.badRequest().build();
                 }
                 reservation.addStall(stall);
@@ -65,10 +65,6 @@ public class ReservationController {
             var reservation = reservationRepository.findById(id).orElse(null);
             if(reservation == null)
                 return ResponseEntity.badRequest().build();
-
-            for (var stall: reservation.getStalls() ) {
-                stall.setIsReserved(false);
-            }
 
             reservationRepository.delete(reservation);
             return ResponseEntity.noContent().build();

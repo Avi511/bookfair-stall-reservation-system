@@ -58,21 +58,22 @@ public class SecurityConfig {
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(c -> c
-                        .requestMatchers("/api/genres/**").permitAll()
-                        .requestMatchers("/api/employees/**").hasRole(Role.EMPLOYEE.name())
-                        .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/auth/refresh").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(c ->
-                {
-                    c.authenticationEntryPoint(
-                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-                    c.accessDeniedHandler(((request, response, accessDeniedException) ->
-                            response.setStatus(HttpStatus.FORBIDDEN.value())));
-                });
+                        .anyRequest().permitAll()
+//                        .requestMatchers("/api/genres/**").permitAll()
+//                        .requestMatchers("/api/employees/**").hasRole(Role.EMPLOYEE.name())
+//                        .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
+//                        .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
+//                        .requestMatchers(HttpMethod.GET,"/api/auth/refresh").permitAll()
+//                        .anyRequest().authenticated()
+                );
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .exceptionHandling(c ->
+//                {
+//                    c.authenticationEntryPoint(
+//                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+//                    c.accessDeniedHandler(((request, response, accessDeniedException) ->
+//                            response.setStatus(HttpStatus.FORBIDDEN.value())));
+//                });
 
         return http.build();
     }

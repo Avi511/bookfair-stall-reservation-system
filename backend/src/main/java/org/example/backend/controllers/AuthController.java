@@ -52,7 +52,7 @@ public class AuthController {
            var cookie = new Cookie("refreshToken", refreshToken.toString());
            cookie.setHttpOnly(true);
            cookie.setPath("/");
-           cookie.setMaxAge(jwtConfig.getAccessTokenExpiration()); //7days
+           cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration()); //7days
            cookie.setSecure(true);
            response.addCookie(cookie);
 
