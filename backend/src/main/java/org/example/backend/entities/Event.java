@@ -20,14 +20,14 @@ public class Event {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "year")
+    @Column(name = "year", nullable = false)
     private Integer year;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private EventStatus status;
 
     @Column(name = "start_date")
@@ -42,6 +42,6 @@ public class Event {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        if (this.status == null) this.status = EventStatus.ACTIVE;
+        if (this.status == null) this.status = EventStatus.DRAFT;
     }
 }

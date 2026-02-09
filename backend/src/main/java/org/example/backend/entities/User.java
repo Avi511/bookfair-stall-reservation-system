@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -30,7 +28,7 @@ public class User {
     private String businessName;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Role role;
 
     @Column(name = "created_at")
@@ -39,6 +37,7 @@ public class User {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.role == null) this.role = Role.USER;
     }
 
 }

@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -23,8 +22,8 @@ public class Reservation {
     @Column(name = "reservation_date", nullable = false)
     private LocalDateTime reservationDate;
 
-    @Column(name = "qr_code_path")
-    private String qrToken;
+    @Column(name = "qr_token", nullable = false)
+    private UUID qrToken;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -38,17 +37,18 @@ public class Reservation {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToMany
-    @JoinTable(
-            name = "reservation_stalls",
-            joinColumns = @JoinColumn(name = "reservation_id"),
-            inverseJoinColumns = @JoinColumn(name = "stall_id")
-    )
-
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<Stall> stalls = new HashSet<>();
-    public void addStall(Stall stall) {stalls.add(stall);}
-    public void removeStall(Stall stall){ stalls.remove(stall); }
+    private List<ReservationStall> reservationStalls = new ArrayList<>();
+
+    public void addStall(Stall stall) {
+        var link = new ReservationStall(this, stall, this.event);
+        reservationStalls.add(link);
+    }
+
+    public void removeStall(Stall stall) {
+        reservationStalls.removeIf(rs -> rs.getStall().getId().equals(stall.getId()));
+    }
 
     @ManyToMany
     @JoinTable(
@@ -65,5 +65,6 @@ public class Reservation {
     protected void onCreate() {
         this.reservationDate = LocalDateTime.now();
         if(this.status == null) this.status = ReservationStatus.CONFIRMED;
+        if(this.qrToken == null) this.qrToken = UUID.randomUUID();
     }
 }
