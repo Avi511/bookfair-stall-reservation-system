@@ -99,4 +99,32 @@ body {
 }
 .message-fade {
   animation: msg-fade-slide 500ms ease both;
+  /* Blue theme color palette */
+  --color-primary: #1E6FF3;     /* vivid blue (CTA) */
+  --color-secondary: #60A5FA;   /* lighter blue */
+  --color-accent: #EAF4FF;      /* very light blue / accent */
+  --color-background: #F8FBFF;  /* near-white blue tint */
+  --color-dark: #08203B;        /* deep navy for nav/footer */
+
+  /* Navbar specific variables */
+  --navbar-bg: var(--color-dark);
+  --navbar-text: var(--color-accent);
+  --navbar-cta: var(--color-primary);
+  --navbar-border: var(--color-secondary);
+}   /* ✅ YOU MISSED THIS CLOSING BRACE */
+
+ /* Navbar fallback styles using the project's CSS color variables */
+.navbar {
+  background-color: var(--navbar-bg);
+  color: var(--navbar-text);
+  border-bottom: 1px solid var(--navbar-border);
+}
+
+.navbar a.cta {
+  background-color: var(--navbar-cta);
+  color: var(--navbar-text);
+}
+
+.navbar a.cta:hover {
+  opacity: 0.95;
 }

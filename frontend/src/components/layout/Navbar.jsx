@@ -15,17 +15,19 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <nav className="sticky top-0 z-50 w-full transition-all duration-300 border-b border-white/10 backdrop-blur-xl relative">
+    <nav className="relative sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-xl">
+      {/* Background gradient layer */}
       <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-90" />
+
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo Section */}
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-xl bg-gradient-to-tr from-accent to-secondary group-hover:rotate-6">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold tracking-tight text-white font-heading">
+              <span className="text-xl font-bold tracking-tight text-white">
                 Colombo<span className="text-accent">Bookfair</span>
               </span>
               <span className="text-[0.65rem] font-medium text-gray-300 uppercase tracking-widest">
@@ -34,8 +36,8 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="items-center hidden space-x-8 md:flex">
+          {/* Desktop nav */}
+          <div className="items-center hidden space-x-6 md:flex">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -57,24 +59,24 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Action Button */}
+            {/* Action button */}
             <Link
               to="/login"
-              className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-secondary to-accent hover:shadow-[0_0_20px_rgba(0,183,181,0.5)] hover:scale-105"
+              className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-secondary to-accent hover:scale-105"
             >
-              <span className="absolute right-0 w-8 h-32 -mt-12 transition-all duration-1000 transform translate-x-12 bg-white opacity-10 rotate-12 group-hover:-translate-x-40 ease"></span>
               <span className="relative flex items-center gap-2">
-                Reserve Stall{" "}
+                Reserve Stall
                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile menu button */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen((v) => !v)}
               className="p-2 text-gray-200 transition-colors rounded-md hover:text-white hover:bg-white/10"
+              aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -86,12 +88,15 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile dropdown */}
       <div
-        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
-        <div className="px-4 pt-2 pb-6 space-y-2 border-t border-white/10 backdrop-blur-xl relative">
+        <div className="relative px-4 pt-2 pb-6 space-y-2 border-t border-white/10 backdrop-blur-xl">
           <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-95" />
+
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -106,6 +111,7 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
           <Link
             to="/login"
             onClick={() => setIsMobileMenuOpen(false)}
