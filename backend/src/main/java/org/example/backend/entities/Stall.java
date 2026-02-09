@@ -17,20 +17,16 @@ public class Stall {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "stall_code")
+    @Column(name = "stall_code", nullable = false, unique = true)
     private String stallCode;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "size")
+    @Column(name = "size", nullable = false)
     private Size size;
 
-    @Column(name = "is_reserved")
-    private Boolean isReserved;
-
-    @Column(name = "x_position")
+    @Column(name = "x_position", nullable = false)
     private int xPosition;
 
-    @Column(name = "y_position")
+    @Column(name = "y_position", nullable = false)
     private int yPosition;
-
 }
