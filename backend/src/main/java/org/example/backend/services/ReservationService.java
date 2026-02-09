@@ -82,7 +82,6 @@ public class ReservationService {
             );
             reservation.getReservationStalls().add(rs);
         }
-        System.out.println("links = " + reservation.getReservationStalls().size());
 
         reservationRepository.save(reservation);
 
