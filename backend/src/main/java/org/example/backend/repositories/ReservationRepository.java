@@ -27,4 +27,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("status") ReservationStatus status
     );
 
+    @Query("""
+        select distinct rs.stall.id
+        from Reservation r
+        join r.reservationStalls rs
+        where r.event.id = :eventId
+          and r.status = :status
+    """)
+    List<Long> findReservedStallIdsByEvent(
+            @Param("eventId") Integer eventId,
+            @Param("status") ReservationStatus status
+    );
+
 }
