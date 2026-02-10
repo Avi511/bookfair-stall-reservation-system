@@ -2,6 +2,8 @@ package org.example.backend.mappers;
 
 import org.example.backend.dtos.ReservationDto;
 import org.example.backend.entities.Reservation;
+import org.example.backend.entities.ReservationStall;
+import org.example.backend.entities.ReservationStatus;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,8 +20,10 @@ public abstract class ReservationMapper {
 
     @AfterMapping
     protected void mapStalls(Reservation reservation, @MappingTarget ReservationDto dto) {
+        boolean includeInactive = reservation.getStatus() == ReservationStatus.CANCELLED;
         dto.setStalls(
                 reservation.getReservationStalls().stream()
+                        .filter(rs -> includeInactive || rs.isActive())
                         .map(rs -> stallMapper.toDto(rs.getStall()))
                         .toList()
         );

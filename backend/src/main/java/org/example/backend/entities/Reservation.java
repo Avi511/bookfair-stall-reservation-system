@@ -42,7 +42,7 @@ public class Reservation {
     private List<ReservationStall> reservationStalls = new ArrayList<>();
 
     public void addStall(Stall stall) {
-        var link = new ReservationStall(this, stall, this.event);
+        var link = new ReservationStall(this, stall, this.event,true);
         reservationStalls.add(link);
     }
 
