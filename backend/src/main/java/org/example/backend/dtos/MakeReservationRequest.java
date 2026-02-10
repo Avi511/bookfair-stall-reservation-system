@@ -1,14 +1,18 @@
 package org.example.backend.dtos;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 @Data
 public class MakeReservationRequest {
-    @NotBlank(message = "user id is required.")
-    private Long userId;
+    @NotNull
+    private Integer eventId;
 
-    private Set<Long> stallIds;
+    @NotEmpty
+    private List<Long> stallIds;
+
 }

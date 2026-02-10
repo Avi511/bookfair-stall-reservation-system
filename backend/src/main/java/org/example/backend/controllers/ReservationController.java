@@ -6,67 +6,43 @@ import org.example.backend.entities.Reservation;
 import org.example.backend.repositories.ReservationRepository;
 import org.example.backend.repositories.StallRepository;
 import org.example.backend.repositories.UserRepository;
+import org.example.backend.services.ReservationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/reservations")
 public class ReservationController {
-    private final UserRepository userRepository;
-    private final ReservationRepository reservationRepository;
-    private final StallRepository stallRepository;
 
-    @GetMapping
-    public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
-    }
+    private final ReservationService reservationService;
+
 
     @PostMapping
     public ResponseEntity<?> makeReservation(
             @RequestBody MakeReservationRequest request
     ) {
-            var user =  userRepository.findById(request.getUserId()).orElse(null);
-
-            if(user == null) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            if(reservationRepository.existsByUser(user)) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            if(request.getStallIds().size() > 3 ) {
-                return ResponseEntity.badRequest().build();
-            }
-
-            var reservation = Reservation.builder()
-                    .user(user)
-                    .build();
-
-            for (var stallId : request.getStallIds()) {
-                var stall = stallRepository.findById(stallId).orElse(null);
-                if(stall == null ) {
-                    return ResponseEntity.badRequest().build();
-                }
-                reservation.addStall(stall);
-            }
-
-            reservationRepository.save(reservation);
-            return  ResponseEntity.ok().body(reservation);
+        Long userId = (Long) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        return ResponseEntity.ok(reservationService.makeReservation(userId, request));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReservation(
-            @PathVariable Long id
-    ) {
-            var reservation = reservationRepository.findById(id).orElse(null);
-            if(reservation == null)
-                return ResponseEntity.badRequest().build();
-
-            reservationRepository.delete(reservation);
-            return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<?> deleteReservation(
+//            @PathVariable Long id
+//    ) {
+//
+//    }
+//
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
+//        return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+//    }
 }
