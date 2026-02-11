@@ -159,9 +159,9 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>11.7.2</version>
                 <configuration>
-                    <url></url>
-                    <user></user>
-                    <password></password>
+                    <url>jdbc:postgresql://localhost:5432/bookfair</url>
+                    <user>postgres</user>
+                    <password>1234</password>
                     <cleanDisabled>false</cleanDisabled>
                 </configuration>
             </plugin>

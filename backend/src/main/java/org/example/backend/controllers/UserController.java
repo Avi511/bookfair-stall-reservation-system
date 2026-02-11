@@ -45,26 +45,33 @@ public class UserController {
 
         return ResponseEntity.ok(userMapper.toDto(user));
     }
-
-    @PostMapping
-    public ResponseEntity<?> registerUser(
-            @Valid @RequestBody RegisterUserRequest request,
-            UriComponentsBuilder uriBuilder
+    @PostMapping("/{id}/change-password")
+    public ResponseEntity<?> changePassword(
+            @PathVariable Long id,
+            @Valid @RequestBody ChangePasswordRequest request
     ) {
-        if(userRepository.existsByEmail(request.getEmail()))
-            return ResponseEntity.badRequest().body(
-                    Map.of("email", "Email is already registered.")
-            );
+        var user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("message", "User not found"));
+        }
 
-        var user = userMapper.toEntity(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(Role.USER);
+        // ✅ CORRECT WAY
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(Map.of("oldPassword", "Old password is incorrect"));
+        }
+
+        // ✅ encode new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        var userDto = userMapper.toDto(user);
-        var uri = uriBuilder.path("/api/users/{id}").buildAndExpand(userDto.getId()).toUri();
-        return ResponseEntity.created(uri).body(userDto);
+        return ResponseEntity.noContent().build();
     }
+
+
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(
