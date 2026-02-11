@@ -6,6 +6,7 @@ import org.example.backend.dtos.StallAvailabilityDto;
 import org.example.backend.entities.Event;
 import org.example.backend.entities.ReservationStatus;
 import org.example.backend.entities.Stall;
+import org.example.backend.repositories.EventRepository;
 import org.example.backend.repositories.ReservationRepository;
 import org.example.backend.repositories.StallRepository;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,12 @@ import java.util.Set;
 @Service
 @AllArgsConstructor
 public class StallAvailabilityService {
+
     private final EventRepository eventRepository;
     private final StallRepository stallRepository;
     private final ReservationRepository reservationRepository;
 
-    public EventStallAvailabilityDto getAvailability(Integer eventId) {
+    public EventStallAvailabilityDto getAvailability(Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NoSuchElementException("Event not found."));
 
@@ -35,7 +37,12 @@ public class StallAvailabilityService {
 
         List<StallAvailabilityDto> stalls = stallRepository.findAll().stream()
                 .map(stall -> toDto(stall, reservedSet.contains(stall.getId())))
-                .sorted(Comparator.comparing(StallAvailabilityDto::getStallCode, String.CASE_INSENSITIVE_ORDER))
+                .sorted(
+                        Comparator.comparing(
+                                StallAvailabilityDto::getStallCode,
+                                String.CASE_INSENSITIVE_ORDER
+                        )
+                )
                 .toList();
 
         EventStallAvailabilityDto response = new EventStallAvailabilityDto();

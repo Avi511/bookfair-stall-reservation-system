@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ReservationStallRepository extends JpaRepository<ReservationStall, Long> {
+
     @Query("""
         select (count(rs) > 0)
         from ReservationStall rs
@@ -18,7 +19,7 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
           and r.status = :status
     """)
     boolean anyReservedInEvent(
-            @Param("eventId") Integer eventId,
+            @Param("eventId") Long eventId,          // ✅ FIXED
             @Param("stallIds") List<Long> stallIds,
             @Param("status") ReservationStatus status
     );
@@ -32,7 +33,7 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
           and r.status = :status
     """)
     List<Long> findMyReservedStallIdsInEvent(
-            @Param("eventId") Integer eventId,
+            @Param("eventId") Long eventId,           // ✅ FIXED
             @Param("userId") Long userId,
             @Param("status") ReservationStatus status
     );

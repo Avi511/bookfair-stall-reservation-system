@@ -18,19 +18,23 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/api/events")
 public class StallAvailabilityController {
+
     private final StallAvailabilityService stallAvailabilityService;
 
     @GetMapping("/{eventId}/stalls/availability")
     public ResponseEntity<EventStallAvailabilityDto> getAvailability(
-            @PathVariable Integer eventId
+            @PathVariable Long eventId
     ) {
-        return ResponseEntity.ok(stallAvailabilityService.getAvailability(eventId));
+        return ResponseEntity.ok(
+                stallAvailabilityService.getAvailability(eventId)
+        );
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<Map<String, String>> handleNotFound(
             NoSuchElementException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage()));
     }
 }

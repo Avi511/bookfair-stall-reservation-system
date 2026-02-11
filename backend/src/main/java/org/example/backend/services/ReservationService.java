@@ -6,6 +6,7 @@ import org.example.backend.dtos.MakeReservationRequest;
 import org.example.backend.dtos.ReservationDto;
 import org.example.backend.entities.*;
 import org.example.backend.mappers.ReservationMapper;
+import org.example.backend.repositories.EventRepository;
 import org.example.backend.repositories.ReservationRepository;
 import org.example.backend.repositories.ReservationStallRepository;
 import org.example.backend.repositories.StallRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class ReservationService {
+
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final StallRepository stallRepository;
@@ -22,13 +24,12 @@ public class ReservationService {
     private final ReservationStallRepository reservationStallRepository;
     private final ReservationMapper reservationMapper;
 
-
     @Transactional
     public ReservationDto makeReservation(Long userId, MakeReservationRequest request) {
         final int MAXIMUM_STALLS_PER_USER = 3;
 
         var user = userRepository.findById(userId).orElseThrow();
-        if(user.getRole() != Role.USER) {
+        if (user.getRole() != Role.USER) {
             throw new IllegalArgumentException("Only business user can make reservations.");
         }
 
@@ -38,31 +39,34 @@ public class ReservationService {
         }
 
         var requestedStallIds = request.getStallIds().stream().distinct().toList();
-        if(requestedStallIds.isEmpty() || requestedStallIds.size() > MAXIMUM_STALLS_PER_USER) {
-            throw new  IllegalArgumentException("You must reserve 1 to 3 stalls.");
+        if (requestedStallIds.isEmpty() || requestedStallIds.size() > MAXIMUM_STALLS_PER_USER) {
+            throw new IllegalArgumentException("You must reserve 1 to 3 stalls.");
         }
 
         var stalls = stallRepository.findAllById(requestedStallIds);
-        if(stalls.size() != request.getStallIds().size()) {
-            throw new IllegalArgumentException("One or more stall IDs are invalid");
+        if (stalls.size() != requestedStallIds.size()) {
+            throw new IllegalArgumentException("One or more stall IDs are invalid.");
         }
 
-        long alreadyConfirmedCount = reservationRepository.countStallsForUserInEventByStatus(
-                userId,
-                request.getEventId(),
-                ReservationStatus.CONFIRMED
-        );
+        long alreadyConfirmedCount =
+                reservationRepository.countStallsForUserInEventByStatus(
+                        userId,
+                        request.getEventId(),
+                        ReservationStatus.CONFIRMED
+                );
 
-        if(alreadyConfirmedCount + requestedStallIds.size() > MAXIMUM_STALLS_PER_USER) {
+        if (alreadyConfirmedCount + requestedStallIds.size() > MAXIMUM_STALLS_PER_USER) {
             throw new IllegalArgumentException("Max 3 stalls per event.");
         }
 
-        boolean anyToken = reservationStallRepository.anyReservedInEvent(
-                request.getEventId(),
-                requestedStallIds,
-                ReservationStatus.CONFIRMED
-        );
-        if(anyToken) {
+        boolean anyTaken =
+                reservationStallRepository.anyReservedInEvent(
+                        request.getEventId(),
+                        requestedStallIds,
+                        ReservationStatus.CONFIRMED
+                );
+
+        if (anyTaken) {
             throw new IllegalArgumentException("One or more stalls are already reserved.");
         }
 
@@ -74,12 +78,8 @@ public class ReservationService {
 
         reservation = reservationRepository.save(reservation);
 
-        for(var stall: stalls) {
-            var rs = new ReservationStall(
-                    reservation,
-                    stall,
-                    event
-            );
+        for (var stall : stalls) {
+            var rs = new ReservationStall(reservation, stall, event);
             reservation.getReservationStalls().add(rs);
         }
 

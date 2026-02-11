@@ -10,7 +10,9 @@ import java.util.Set;
 @Data
 public class MakeReservationRequest {
     @NotNull
-    private Integer eventId;
+
+    private Long eventId;
+
 
     @NotEmpty
     private List<Long> stallIds;

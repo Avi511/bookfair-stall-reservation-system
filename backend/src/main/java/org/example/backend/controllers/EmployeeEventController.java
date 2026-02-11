@@ -21,6 +21,7 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/api/employees/events")
 public class EmployeeEventController {
+
     private final EventService eventService;
 
     @GetMapping
@@ -32,7 +33,7 @@ public class EmployeeEventController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EventDto> getEvent(@PathVariable Integer id) {
+    public ResponseEntity<EventDto> getEvent(@PathVariable Long id) {
         return ResponseEntity.ok(eventService.getEvent(id));
     }
 
@@ -42,13 +43,17 @@ public class EmployeeEventController {
             UriComponentsBuilder uriBuilder
     ) {
         var dto = eventService.createEvent(request);
-        var uri = uriBuilder.path("/api/employees/events/{id}").buildAndExpand(dto.getId()).toUri();
+        var uri = uriBuilder
+                .path("/api/employees/events/{id}")
+                .buildAndExpand(dto.getId())
+                .toUri();
+
         return ResponseEntity.created(uri).body(dto);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<EventDto> updateEvent(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody UpdateEventRequest request
     ) {
         return ResponseEntity.ok(eventService.updateEvent(id, request));
@@ -56,7 +61,7 @@ public class EmployeeEventController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<EventDto> updateStatus(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody UpdateEventStatusRequest request
     ) {
         return ResponseEntity.ok(eventService.updateStatus(id, request.getStatus()));
@@ -66,13 +71,15 @@ public class EmployeeEventController {
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
             IllegalArgumentException ex
     ) {
-        return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
+        return ResponseEntity.badRequest()
+                .body(Map.of("message", ex.getMessage()));
     }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<Map<String, String>> handleNotFoundException(
             NoSuchElementException ex
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("message", ex.getMessage()));
     }
 }

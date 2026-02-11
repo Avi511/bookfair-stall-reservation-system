@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    //find all reservations by user and event
-    List<Reservation> findAllByUser_IdAndEvent_Id(Long userId, Integer eventId);
+    // find all reservations by user and event
+    List<Reservation> findAllByUser_IdAndEvent_Id(Long userId, Long eventId);
 
     @Query("""
         select coalesce(count(rs), 0)
@@ -23,7 +23,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     """)
     long countStallsForUserInEventByStatus(
             @Param("userId") Long userId,
-            @Param("eventId") Integer eventId,
+            @Param("eventId") Long eventId,
             @Param("status") ReservationStatus status
     );
 
@@ -35,8 +35,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
           and r.status = :status
     """)
     List<Long> findReservedStallIdsByEvent(
-            @Param("eventId") Integer eventId,
+            @Param("eventId") Long eventId,
             @Param("status") ReservationStatus status
     );
-
 }
