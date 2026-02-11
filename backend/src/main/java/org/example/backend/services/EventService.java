@@ -7,6 +7,7 @@ import org.example.backend.dtos.UpdateEventRequest;
 import org.example.backend.entities.Event;
 import org.example.backend.entities.EventStatus;
 import org.example.backend.mappers.EventMapper;
+import org.example.backend.repositories.EventRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -17,6 +18,7 @@ import java.util.NoSuchElementException;
 @Service
 @AllArgsConstructor
 public class EventService {
+
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
 
@@ -24,13 +26,15 @@ public class EventService {
         return eventRepository.findAll().stream()
                 .filter(event -> status == null || event.getStatus() == status)
                 .filter(event -> year == null || year.equals(event.getYear()))
-                .sorted(Comparator.comparing(Event::getYear).reversed()
-                        .thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER))
+                .sorted(
+                        Comparator.comparing(Event::getYear).reversed()
+                                .thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER)
+                )
                 .map(eventMapper::toDto)
                 .toList();
     }
 
-    public EventDto getEvent(Integer id) {
+    public EventDto getEvent(Long id) {
         return eventMapper.toDto(findEventById(id));
     }
 
@@ -47,7 +51,7 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
-    public EventDto updateEvent(Integer id, UpdateEventRequest request) {
+    public EventDto updateEvent(Long id, UpdateEventRequest request) {
         validateDates(request.getStartDate(), request.getEndDate());
         ensureUniqueNameYear(request.getName(), request.getYear(), id);
 
@@ -58,8 +62,9 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
-    public EventDto updateStatus(Integer id, EventStatus status) {
+    public EventDto updateStatus(Long id, EventStatus status) {
         var event = findEventById(id);
+
         if (event.getStatus() == EventStatus.ENDED && status != EventStatus.ENDED) {
             throw new IllegalArgumentException("Ended events cannot be reactivated.");
         }
@@ -69,7 +74,7 @@ public class EventService {
         return eventMapper.toDto(event);
     }
 
-    private Event findEventById(Integer id) {
+    private Event findEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Event not found."));
     }
@@ -83,11 +88,13 @@ public class EventService {
         }
     }
 
-    private void ensureUniqueNameYear(String name, Integer year, Integer eventId) {
+    private void ensureUniqueNameYear(String name, Integer year, Long eventId) {
         boolean exists = eventRepository.findAll().stream()
-                .anyMatch(event -> event.getName().equalsIgnoreCase(name)
-                        && event.getYear().equals(year)
-                        && (eventId == null || !event.getId().equals(eventId)));
+                .anyMatch(event ->
+                        event.getName().equalsIgnoreCase(name)
+                                && event.getYear().equals(year)
+                                && (eventId == null || !event.getId().equals(eventId))
+                );
 
         if (exists) {
             throw new IllegalArgumentException("Event name and year must be unique.");
