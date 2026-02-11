@@ -24,6 +24,8 @@ public class ReservationService {
     private final ReservationStallRepository reservationStallRepository;
     private final ReservationMapper reservationMapper;
     private final GenreMapper genreMapper;
+    private final QrCodeService qrCodeService;
+    private final EmailService emailService;
 
     @Transactional
     public List<ReservationDto> listReservations(Long userId, Integer eventId) {
@@ -120,6 +122,7 @@ public class ReservationService {
 
         reservationRepository.save(reservation);
 
+        sendReservationQr(user, reservation);
         return reservationMapper.toDto(reservation);
     }
 
@@ -269,6 +272,16 @@ public class ReservationService {
         return reservation.getGenres().stream()
                 .map(genreMapper::toDto)
                 .toList();
+    }
+
+    private void sendReservationQr(User user, Reservation reservation) {
+        try {
+            String qrString = reservation.getQrToken().toString();
+            byte[] qrPng = qrCodeService.generatePng(qrString);
+            emailService.sendReservationConfirmation(user, reservation, qrPng);
+        } catch (Exception e) {
+            System.err.println("QR email failed: " + e.getMessage());
+        }
     }
 
 }
