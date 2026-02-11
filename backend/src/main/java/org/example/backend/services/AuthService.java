@@ -46,9 +46,9 @@ public class AuthService {
         return jwtService.generateAccessToken(user).toString();
     }
 
-    public UserDto getCurrentUser(Long userId) {
-        var user =  userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        return userMapper.toDto(user);
+    public UserDto getCurrentUser() {
+        var user =  userRepository.findById(getCurrentUserId()).orElseThrow(UserNotFoundException::new);
+        return userMapper.toUserDto(user);
     }
 
     public Long getCurrentUserId() {

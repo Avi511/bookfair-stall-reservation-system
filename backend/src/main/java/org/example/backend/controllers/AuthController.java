@@ -52,7 +52,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> me() {
-        var userDto = authService.getCurrentUser(authService.getCurrentUserId());
+        var userDto = authService.getCurrentUser();
         return ResponseEntity.ok(userDto);
     }
 
