@@ -12,10 +12,13 @@ public abstract class ReservationMapper {
 
     @Autowired
     protected StallMapper stallMapper;
+    @Autowired
+    protected GenreMapper genreMapper;
 
     @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "event.id", target = "eventId")
     @Mapping(target = "stalls", ignore = true)
+    @Mapping(target = "genres", ignore = true)
     public abstract ReservationDto toDto(Reservation reservation);
 
     @AfterMapping
@@ -25,6 +28,11 @@ public abstract class ReservationMapper {
                 reservation.getReservationStalls().stream()
                         .filter(rs -> includeInactive || rs.isActive())
                         .map(rs -> stallMapper.toDto(rs.getStall()))
+                        .toList()
+        );
+        dto.setGenres(
+                reservation.getGenres().stream()
+                        .map(genreMapper::toDto)
                         .toList()
         );
     }

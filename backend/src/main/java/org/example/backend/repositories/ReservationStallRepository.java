@@ -26,6 +26,14 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
     @Query("""
         select rs.stall.id
         from ReservationStall rs
+        where rs.event.id = :eventId
+          and rs.active = true
+    """)
+    List<Long> findActiveReservedStallIdsByEvent(@Param("eventId") Integer eventId);
+
+    @Query("""
+        select rs.stall.id
+        from ReservationStall rs
         join rs.reservation r
         where rs.event.id = :eventId
           and r.user.id = :userId

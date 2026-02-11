@@ -2,14 +2,13 @@ package org.example.backend.services;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.example.backend.dtos.GenreDto;
 import org.example.backend.dtos.MakeReservationRequest;
 import org.example.backend.dtos.ReservationDto;
 import org.example.backend.entities.*;
+import org.example.backend.mappers.GenreMapper;
 import org.example.backend.mappers.ReservationMapper;
-import org.example.backend.repositories.ReservationRepository;
-import org.example.backend.repositories.ReservationStallRepository;
-import org.example.backend.repositories.StallRepository;
-import org.example.backend.repositories.UserRepository;
+import org.example.backend.repositories.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,9 +19,11 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final StallRepository stallRepository;
+    private final GenreRepository genreRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationStallRepository reservationStallRepository;
     private final ReservationMapper reservationMapper;
+    private final GenreMapper genreMapper;
 
     @Transactional
     public List<ReservationDto> listReservations(Long userId, Integer eventId) {
@@ -35,6 +36,24 @@ public class ReservationService {
                 ? reservationRepository.findAllByUserIdWithStalls(userId)
                 : reservationRepository.findAllByUserIdAndEventIdWithStalls(userId, eventId);
 
+        return reservations.stream()
+                .map(reservationMapper::toDto)
+                .toList();
+    }
+
+    @Transactional
+    public List<ReservationDto> listReservationsByEvent(Integer eventId) {
+        return listReservationsFiltered(eventId, null, null);
+    }
+
+    @Transactional
+    public List<ReservationDto> listReservationsFiltered(Integer eventId, ReservationStatus status, Long userId) {
+        if (eventId != null) {
+            eventRepository.findById(eventId)
+                    .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+        }
+
+        var reservations = reservationRepository.findAllWithFilters(eventId, status, userId);
         return reservations.stream()
                 .map(reservationMapper::toDto)
                 .toList();
@@ -199,6 +218,57 @@ public class ReservationService {
         reservationRepository.save(reservation);
         var fresh = reservationRepository.findByIdWithStalls(reservationId);
         return reservationMapper.toDto(fresh);
+    }
+
+    @Transactional
+    public List<GenreDto> addReservationGenres(Long userId, Long reservationId, List<Integer> genreIds) {
+        var reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new IllegalArgumentException("Reservation not found")
+        );
+
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("User can only update own reservation.");
+        }
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Reservation is not confirmed.");
+        }
+
+        if (reservation.getEvent().getStatus() != EventStatus.ACTIVE) {
+            throw new IllegalArgumentException("Event is not active.");
+        }
+
+        var distinctIds = genreIds.stream().distinct().toList();
+        if (distinctIds.isEmpty()) {
+            throw new IllegalArgumentException("You must select at least 1 genre.");
+        }
+
+        var genres = genreRepository.findAllById(distinctIds);
+        if (genres.size() != distinctIds.size()) {
+            throw new IllegalArgumentException("One or more genre IDs are invalid");
+        }
+
+        reservation.getGenres().addAll(genres);
+        reservationRepository.save(reservation);
+
+        return reservation.getGenres().stream()
+                .map(genreMapper::toDto)
+                .toList();
+    }
+
+    @Transactional
+    public List<GenreDto> listReservationGenres(Long userId, Long reservationId) {
+        var reservation = reservationRepository.findById(reservationId).orElseThrow(
+                () -> new IllegalArgumentException("Reservation not found")
+        );
+
+        if (!reservation.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("User can only view own reservation.");
+        }
+
+        return reservation.getGenres().stream()
+                .map(genreMapper::toDto)
+                .toList();
     }
 
 }

@@ -1,6 +1,7 @@
 package org.example.backend.repositories;
 
 import org.example.backend.entities.Reservation;
+import org.example.backend.entities.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -51,6 +52,22 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     );
 
     @Query("""
+        select distinct r
+        from Reservation r
+        left join fetch r.reservationStalls rs
+        left join fetch rs.stall s
+        left join fetch r.genres g
+        where (:eventId is null or r.event.id = :eventId)
+          and (:status is null or r.status = :status)
+          and (:userId is null or r.user.id = :userId)
+    """)
+    List<Reservation> findAllWithFilters(
+            @Param("eventId") Integer eventId,
+            @Param("status") ReservationStatus status,
+            @Param("userId") Long userId
+    );
+
+    @Query("""
         select r
         from Reservation r
         left join fetch r.reservationStalls rs
@@ -59,5 +76,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         where r.id = :id
     """)
     Reservation findByIdWithStalls(@Param("id") Long id);
+
+    @Query("""
+        select rs.stall.id
+        from Reservation r
+        join r.reservationStalls rs
+        where r.event.id = :eventId
+          and r.status = :status
+          and rs.active = true
+    """)
+    List<Long> findReservedStallIdsByEvent(
+            @Param("eventId") Integer eventId,
+            @Param("status") ReservationStatus status
+    );
 
 }
