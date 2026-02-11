@@ -33,7 +33,7 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
           and r.status = :status
     """)
     List<Long> findMyReservedStallIdsInEvent(
-            @Param("eventId") Long eventId,           // ✅ FIXED
+            @Param("eventId") Long eventId,           // IXED
             @Param("userId") Long userId,
             @Param("status") ReservationStatus status
     );
