@@ -11,10 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 public class ReservationStall {
 
-    public ReservationStall(Reservation reservation, Stall stall, Event event) {
+    public ReservationStall(Reservation reservation, Stall stall, Event event, boolean active) {
         this.reservation = reservation;
         this.stall = stall;
         this.event = event;
+        this.active = active;
     }
 
     @EmbeddedId
@@ -33,4 +34,7 @@ public class ReservationStall {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
+
+    @Column(name = "active", nullable = false)
+    private boolean active;
 }

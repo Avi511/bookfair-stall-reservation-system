@@ -10,6 +10,7 @@ import org.example.backend.dtos.UserDto;
 import org.example.backend.entities.Role;
 import org.example.backend.mappers.UserMapper;
 import org.example.backend.repositories.UserRepository;
+import org.example.backend.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,90 +25,32 @@ import java.util.Map;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-    @GetMapping
-    public List<UserDto> getAllUsers() {
-
-        return userRepository.findAll()
-                .stream()
-                .map(userMapper::toDto)
-                .toList();
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
-        var user =  userRepository.findById(id).orElse(null);
-        if(user == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        return ResponseEntity.ok(userMapper.toDto(user));
-    }
 
     @PostMapping
     public ResponseEntity<?> registerUser(
             @Valid @RequestBody RegisterUserRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        if(userRepository.existsByEmail(request.getEmail()))
-            return ResponseEntity.badRequest().body(
-                    Map.of("email", "Email is already registered.")
-            );
-
-        var user = userMapper.toEntity(request);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRole(Role.USER);
-        userRepository.save(user);
-
-        var userDto = userMapper.toDto(user);
+        var userDto = userService.registerBusinessUser(request);
         var uri = uriBuilder.path("/api/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     public ResponseEntity<UserDto> updateUser(
-            @PathVariable Long id,
             @RequestBody UpdateUserRequest request
     ) {
-        var user = userRepository.findById(id).orElse(null);
-        if(user == null)
-            return ResponseEntity.notFound().build();
-
-        userMapper.update(request, user);
-        userRepository.save(user);
-
-        return ResponseEntity.ok(userMapper.toDto(user));
+        var userDto = userService.updateUser(request);
+        return ResponseEntity.ok(userDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        var user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            return ResponseEntity.notFound().build();
-        }
-        userRepository.delete(user);
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{id}/change-password")
+    @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(
-            @PathVariable Long id,
             @Valid @RequestBody ChangePasswordRequest request
     ) {
-        var user = userRepository.findById(id).orElse(null);
-        if(user == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if(!user.getPassword().equals(request.getOldPassword())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-
-        user.setPassword(request.getNewPassword());
-        userRepository.save(user);
-
+        userService.changePassword(request);
         return ResponseEntity.noContent().build();
     }
 }
