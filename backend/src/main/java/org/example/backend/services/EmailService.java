@@ -63,18 +63,17 @@ public class EmailService {
                     .map(rs -> rs.getStall().getStallCode())
                     .collect(Collectors.joining(", "));
 
-            String subject = "Book Fair Reservation Confirmed";
+            String subject = "Reservation Confirmed";
 
             String html = """
                     <div style="font-family:Arial,sans-serif;">
-                      <h2>Reservation Confirmed ✅</h2>
+                      <h2>Reservation Confirmed</h2>
                       <p>Hello %s,</p>
-                      <p>Your reservation is confirmed.</p>
+                      <p>Reservation Confirmed. Thank you for the reservation.</p>
                       <ul>
                         <li><b>Reservation ID:</b> %s</li>
                         <li><b>Event ID:</b> %s</li>
                         <li><b>Stalls:</b> %s</li>
-                        <li><b>QR Token:</b> %s</li>
                       </ul>
                       <p>Show this QR at the entrance:</p>
                       <img src="cid:qrImage" style="width:220px;height:220px;" />
@@ -84,8 +83,7 @@ public class EmailService {
                     safe(user.getBusinessName()),
                     reservation.getId(),
                     reservation.getEvent().getId(),
-                    stallList,
-                    reservation.getQrToken().toString()
+                    stallList
             );
 
             MimeMessage message = mailSender.createMimeMessage();
