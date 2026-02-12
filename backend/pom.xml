@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.example</groupId>
     <artifactId>backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>backend</name>
     <description>backend</description>
     <url/>
@@ -173,18 +173,6 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>11.7.2</version>
-                <configuration>
-                    <url></url>
-                    <user></user>
-                    <password></password>
-                    <cleanDisabled>false</cleanDisabled>
                 </configuration>
             </plugin>
 
