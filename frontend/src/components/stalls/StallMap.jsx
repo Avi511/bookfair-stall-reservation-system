@@ -1,5 +1,5 @@
 import React from "react";
-import Stall from "./Stall";
+import Stall from "./Stalls";
 
 export default function StallMap({
   stalls = [],
