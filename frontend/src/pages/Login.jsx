@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
+import toast from "react-hot-toast";
 import axios from "../api/axiosInstance";
 
 function parseJwt(token) {
@@ -45,6 +46,17 @@ export default function Login() {
 
       const payload = parseJwt(token);
       const role = payload?.role || payload?.roles?.[0];
+
+      let userName = payload?.businessName || payload?.name || payload?.sub;
+      try {
+        const meRes = await axios.get("/auth/me");
+        const me = meRes?.data;
+        userName = me?.businessName || me?.name || me?.email || userName;
+      } catch {
+        // Keep best available value from token if /auth/me fails.
+      }
+
+      toast.success(`Login successful ${userName ? `- ${userName}` : ""}`);
 
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
