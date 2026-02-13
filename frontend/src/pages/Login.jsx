@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
-import axios from "../api/axiosInstance"; // <- your axios instance
+import axios from "../api/axiosInstance";
 
 function parseJwt(token) {
   try {
@@ -27,7 +27,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // if you redirect user to login from a protected route
   const redirectTo = location.state?.from?.pathname;
 
   async function handleSubmit(e) {
@@ -36,26 +35,22 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // ✅ CHANGE THIS URL to your backend login endpoint if different
-      // common: /api/auth/login
-      const res = await axios.post("/api/auth/login", { email, password });
+      const res = await axios.post("/auth/login", { email, password });
 
-      // token could be { token: "..." } OR { accessToken: "..." }
       const token = res.data?.token || res.data?.accessToken;
       if (!token) throw new Error("Token not found in response");
 
+      localStorage.setItem("token", token);
       localStorage.setItem("accessToken", token);
 
       const payload = parseJwt(token);
-      const role = payload?.role || payload?.roles?.[0]; // supports both styles
+      const role = payload?.role || payload?.roles?.[0];
 
-      // If user came from protected page, go there first
       if (redirectTo) {
         navigate(redirectTo, { replace: true });
         return;
       }
 
-      // Role-based redirect
       if (role === "EMPLOYEE" || role === "ROLE_EMPLOYEE") {
         navigate("/employee", { replace: true });
       } else {
@@ -107,7 +102,7 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="********"
               required
             />
           </div>
@@ -121,7 +116,7 @@ export default function Login() {
         </form>
 
         <div className="mt-4 text-sm text-gray-700">
-          Don’t have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link className="font-semibold text-[var(--color-primary)]" to="/register">
             Register
           </Link>

@@ -24,15 +24,12 @@ export default function Register() {
 
     setLoading(true);
     try {
-      // ✅ CHANGE THIS URL to your backend register endpoint if different
-      // common: /api/auth/register
-      await axios.post("/api/auth/register", {
+      await axios.post("/users", {
         email,
         password,
         businessName,
       });
 
-      // after register, go to login
       navigate("/login", { replace: true });
     } catch (err) {
       const msg =
@@ -91,7 +88,7 @@ export default function Register() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="********"
               required
             />
           </div>
@@ -103,7 +100,7 @@ export default function Register() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="********"
               required
             />
           </div>
@@ -117,10 +114,10 @@ export default function Register() {
         </form>
 
         <div className="mt-4 text-sm text-gray-700">
-            <p>
+          <p>
             Already have an account?
-                <Link to="/login"> Login</Link>
-            </p>
+            <Link to="/login"> Login</Link>
+          </p>
         </div>
       </div>
     </div>
