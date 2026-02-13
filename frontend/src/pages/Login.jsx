@@ -28,6 +28,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const params = new URLSearchParams(location.search);
+  const sessionExpired = params.get('sessionExpired');
+
   const redirectTo = location.state?.from?.pathname;
 
   async function handleSubmit(e) {
@@ -91,6 +94,12 @@ export default function Login() {
         {error && (
           <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
             {error}
+          </div>
+        )}
+
+        {sessionExpired && (
+          <div className="px-4 py-3 mt-4 text-sm text-yellow-800 rounded-xl bg-yellow-50">
+            Your session has expired. Please log in again.
           </div>
         )}
 
