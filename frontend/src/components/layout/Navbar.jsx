@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Menu, X, ChevronRight } from "lucide-react";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -14,14 +16,27 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  const hasToken =
+    Boolean(localStorage.getItem("token")) ||
+    Boolean(localStorage.getItem("accessToken"));
+
+  const actionPath = hasToken ? "/reserve-stalls" : "/login";
+  const actionLabel = hasToken ? "Reserve Stall" : "Login";
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    setIsMobileMenuOpen(false);
+    toast.success("Logged out successfully");
+    navigate("/", { replace: true });
+  };
+
   return (
     <nav className="relative sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-xl">
-      {/* Background gradient layer */}
       <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-90" />
 
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-xl bg-gradient-to-tr from-accent to-secondary group-hover:rotate-6">
               <BookOpen className="w-6 h-6 text-white" />
@@ -36,7 +51,6 @@ const Navbar = () => {
             </div>
           </Link>
 
-          {/* Desktop nav */}
           <div className="items-center hidden space-x-6 md:flex">
             {navLinks.map((link) => (
               <Link
@@ -59,19 +73,27 @@ const Navbar = () => {
               </Link>
             ))}
 
-            {/* Action button */}
             <Link
-              to="/login"
+              to={actionPath}
               className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-secondary to-accent hover:scale-105"
             >
               <span className="relative flex items-center gap-2">
-                Reserve Stall
+                {actionLabel}
                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </span>
             </Link>
+
+            {hasToken && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center px-5 py-2.5 font-semibold text-white/90 border border-white/30 rounded-lg hover:bg-white/10"
+              >
+                Logout
+              </button>
+            )}
           </div>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen((v) => !v)}
@@ -88,7 +110,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
@@ -113,12 +134,22 @@ const Navbar = () => {
           ))}
 
           <Link
-            to="/login"
+            to={actionPath}
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex items-center justify-center w-full gap-2 px-4 py-3 mt-4 text-base font-semibold text-white rounded-lg bg-gradient-to-r from-secondary to-accent active:scale-95"
           >
-            Reserve Stall <ChevronRight className="w-4 h-4" />
+            {actionLabel} <ChevronRight className="w-4 h-4" />
           </Link>
+
+          {hasToken && (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center justify-center w-full gap-2 px-4 py-3 text-base font-semibold text-white border rounded-lg border-white/30 hover:bg-white/10"
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
     </nav>

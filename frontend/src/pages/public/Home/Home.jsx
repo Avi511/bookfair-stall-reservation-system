@@ -2,6 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const Home = () => {
+  const isLoggedIn =
+    Boolean(localStorage.getItem("token")) ||
+    Boolean(localStorage.getItem("accessToken"));
+
   return (
     <div className="bg-slate-50 text-slate-900">
       <section className="relative overflow-hidden">
@@ -20,12 +24,14 @@ const Home = () => {
               for the exhibition.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-3 text-white font-semibold shadow-sm hover:brightness-110"
-              >
-                Get started
-              </Link>
+              {!isLoggedIn && (
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center rounded-lg bg-secondary px-6 py-3 text-white font-semibold shadow-sm hover:brightness-110"
+                >
+                  Get started
+                </Link>
+              )}
               <Link
                 to="/about"
                 className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-6 py-3 text-slate-700 font-semibold hover:border-slate-400"
@@ -39,7 +45,7 @@ const Home = () => {
                 <p>Maximum stalls per business</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">A–Z</p>
+                <p className="text-2xl font-bold text-slate-900">A-Z</p>
                 <p>Alphabetical stall naming</p>
               </div>
             </div>
@@ -170,7 +176,6 @@ const Home = () => {
               dimensions.
             </p>
             <div className="mt-6 space-y-4">
-              {/* safer mapping: define stalls array and render */}
               {(() => {
                 const stalls = [
                   {
@@ -234,27 +239,6 @@ const Home = () => {
             <p className="mt-4 text-xs text-slate-500">
               Gray stalls represent reserved units. Green stalls are available.
             </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="rounded-2xl bg-secondary px-6 py-10 text-white shadow-lg md:px-10">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold">
-                Ready to reserve your stall?
-              </h2>
-              <p className="mt-2 text-white/80">
-                Login to begin your reservation and receive your QR entry pass.
-              </p>
-            </div>
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-secondary font-semibold hover:bg-white/90"
-            >
-              Login / Register
-            </Link>
           </div>
         </div>
       </section>

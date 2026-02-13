@@ -1,4 +1,5 @@
 import React from "react";
+import { Toaster } from "react-hot-toast";
 import Navbar from "./components/layout/Navbar";
 import MessageBar from "./components/layout/MessageBar";
 import { ownerMessages } from "./data/ownerMessages";
@@ -12,6 +13,7 @@ function App() {
       <ScrollToTop smooth />
       <MessageBar messages={ownerMessages} />
       <Navbar />
+      <Toaster position="top-right" />
       <main className="flex-grow">
         <AppRoutes />
       </main>

@@ -6,20 +6,19 @@ import About from '../pages/public/About/About';
 import Contact from '../pages/public/Contact/Contact';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import ReserveStalls from '../pages/ReserveStalls';
 
 const AppRoutes = () => {
     return (
         <Routes>
-            {/* Public pages */}
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
 
-            {/* Auth pages */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/reserve-stalls" element={<ReserveStalls />} />
 
-            {/* Optional: 404 fallback */}
             <Route path="*" element={<Home />} />
         </Routes>
     );
