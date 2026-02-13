@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import StallMap from "../components/stalls/StallMap";
 import Loading from "../components/common/Loading";
+import EmptyState from "../components/common/EmptyState";
 
 import { getStallsByEvent } from "../api/stalls.api";
 import { createReservation } from "../api/reservations.api";
@@ -127,6 +128,18 @@ export default function ReserveStalls() {
   }
 
   if (loading) return <Loading text="Loading stalls..." />;
+
+  if (!loading && stalls.length === 0) {
+    return (
+      <div className="max-w-4xl px-4 py-6 mx-auto">
+        <EmptyState
+          title="No active event or no stalls available"
+          description="There are no stalls available for reservation at the moment. Please check back later or contact event organizers."
+          action={<button onClick={() => navigate(-1)} className="px-4 py-2 mt-4 rounded-xl border">Go Back</button>}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl px-4 py-6 mx-auto">
