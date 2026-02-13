@@ -1,15 +1,16 @@
 package org.example.backend.mappers;
 
-import org.example.backend.dtos.RegisterUserRequest;
-import org.example.backend.dtos.UpdateUserRequest;
-import org.example.backend.dtos.UserDto;
+import org.example.backend.dtos.*;
 import org.example.backend.entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring") //spring can create beans of this type at runtime.
+@Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserDto toDto(User user);
+    UserDto toUserDto(User user);
+    EmployeeDto toEmployeeDto(User user);
+
+    User toEntity(RegisterEmployeeRequest request);
 
     User toEntity(RegisterUserRequest request);
 

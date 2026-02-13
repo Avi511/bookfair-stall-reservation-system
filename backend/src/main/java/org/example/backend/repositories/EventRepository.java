@@ -1,4 +1,4 @@
-package org.example.backend.services;
+package org.example.backend.repositories;
 
 import org.example.backend.entities.Event;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -16,4 +16,5 @@ public class ReservationDto {
     private LocalDateTime reservationDate;
     private UUID qrToken;
     private List<StallDto> stalls;
+    private List<GenreDto> genres;
 }

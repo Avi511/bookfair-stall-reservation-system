@@ -8,19 +8,16 @@ import org.example.backend.dtos.UpdateEventRequest;
 import org.example.backend.dtos.UpdateEventStatusRequest;
 import org.example.backend.entities.EventStatus;
 import org.example.backend.services.EventService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api/employees/events")
-public class EmployeeEventController {
+@RequestMapping("/api/events")
+public class EventController {
     private final EventService eventService;
 
     @GetMapping
@@ -62,17 +59,4 @@ public class EmployeeEventController {
         return ResponseEntity.ok(eventService.updateStatus(id, request.getStatus()));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
-            IllegalArgumentException ex
-    ) {
-        return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
-    }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Map<String, String>> handleNotFoundException(
-            NoSuchElementException ex
-    ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", ex.getMessage()));
-    }
 }

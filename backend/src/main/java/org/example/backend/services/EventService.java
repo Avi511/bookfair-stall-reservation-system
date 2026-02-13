@@ -7,6 +7,7 @@ import org.example.backend.dtos.UpdateEventRequest;
 import org.example.backend.entities.Event;
 import org.example.backend.entities.EventStatus;
 import org.example.backend.mappers.EventMapper;
+import org.example.backend.repositories.EventRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
