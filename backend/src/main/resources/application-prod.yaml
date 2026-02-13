@@ -1,0 +1,21 @@
+spring:
+  app:
+    frontend-url: ${FRONTEND_URL}
+  datasource:
+    url: ${DB_URL}
+    driver-class-name: org.postgresql.Driver
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  jwt:
+    secret: ${JWT_SECRET}
+    accessTokenExpiration: 300000 # 5 mins
+    refreshTokenExpiration : 604800 # 7 days
