@@ -7,11 +7,14 @@ import org.example.backend.entities.Event;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface EventMapper {
     EventDto toDto(Event event);
 
     Event toEntity(CreateEventRequest request);
 
+    List<EventDto> toDto(List<Event> events);
     void update(UpdateEventRequest request, @MappingTarget Event event);
 }

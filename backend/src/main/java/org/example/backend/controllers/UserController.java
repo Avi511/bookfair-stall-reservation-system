@@ -7,24 +7,15 @@ import org.example.backend.dtos.ChangePasswordRequest;
 import org.example.backend.dtos.RegisterUserRequest;
 import org.example.backend.dtos.UpdateUserRequest;
 import org.example.backend.dtos.UserDto;
-import org.example.backend.entities.Role;
-import org.example.backend.mappers.UserMapper;
-import org.example.backend.repositories.UserRepository;
 import org.example.backend.services.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.List;
-import java.util.Map;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserRepository userRepository;
     private final UserService userService;
 
 
@@ -40,7 +31,7 @@ public class UserController {
 
     @PutMapping
     public ResponseEntity<UserDto> updateUser(
-            @RequestBody UpdateUserRequest request
+            @Valid @RequestBody UpdateUserRequest request
     ) {
         var userDto = userService.updateUser(request);
         return ResponseEntity.ok(userDto);

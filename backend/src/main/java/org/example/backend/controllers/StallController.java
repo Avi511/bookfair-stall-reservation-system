@@ -1,6 +1,7 @@
 package org.example.backend.controllers;
 
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.example.backend.dtos.AddStallRequest;
 import org.example.backend.dtos.StallAvailabilityDto;
@@ -39,7 +40,7 @@ public class StallController {
 
     @PostMapping
     public ResponseEntity<StallDto> createStall(
-            @RequestBody AddStallRequest request,
+            @Valid @RequestBody AddStallRequest request,
             UriComponentsBuilder uriComponentsBuilder
     ) {
         var dto = stallService.createStall(request);
@@ -50,7 +51,7 @@ public class StallController {
     @PutMapping("/{id}")
     public ResponseEntity<StallDto> updateStall(
             @PathVariable Long id,
-            @RequestBody AddStallRequest request
+            @Valid @RequestBody AddStallRequest request
     ) {
         return ResponseEntity.ok(stallService.updateStall(id, request));
     }

@@ -10,10 +10,6 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    //find all reservations by user and event
-    List<Reservation> findAllByUser_IdAndEvent_Id(Long userId, Integer eventId);
-    List<Reservation> findAllByUser_Id(Long userId);
-
     @Query("""
         select coalesce(count(rs), 0)
         from Reservation r
@@ -76,18 +72,5 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         where r.id = :id
     """)
     Reservation findByIdWithStalls(@Param("id") Long id);
-
-    @Query("""
-        select rs.stall.id
-        from Reservation r
-        join r.reservationStalls rs
-        where r.event.id = :eventId
-          and r.status = :status
-          and rs.active = true
-    """)
-    List<Long> findReservedStallIdsByEvent(
-            @Param("eventId") Integer eventId,
-            @Param("status") ReservationStatus status
-    );
 
 }
