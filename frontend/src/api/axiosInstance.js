@@ -108,13 +108,51 @@ axiosClient.interceptors.response.use(
         processQueue(refreshError, null);
         clearAccessToken();
 
-        // Optional: redirect to login
-        window.location.href = "/login";
+        // dispatch logout event so contexts can clear user state
+        try {
+          window.dispatchEvent(new Event("app:logout"));
+        } catch (e) {
+          // ignore
+        }
+
+        // Redirect to login with session expired flag
+        window.location.href = "/login?sessionExpired=1";
 
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
+    }
+
+    // Map some backend messages to friendlier messages for UI
+    try {
+      const resp = error.response;
+      if (resp && resp.data) {
+        const raw = String(resp.data.message || resp.data.error || "").toLowerCase();
+
+        let friendly = null;
+
+        if (raw.includes("stall") && (raw.includes("taken") || raw.includes("already"))) {
+          friendly = "One or more selected stalls are already reserved. Please refresh and try again.";
+        } else if (raw.includes("max") && raw.includes("3")) {
+          friendly = "You can reserve up to 3 stalls only.";
+        } else if (raw.includes("event") && (raw.includes("not active") || raw.includes("inactive") || raw.includes("closed"))) {
+          friendly = "This event is not active. You cannot reserve stalls for this event.";
+        }
+
+        if (friendly) {
+          resp.data.message = friendly;
+        }
+      }
+    } catch (e) {
+      // ignore mapping errors
+    }
+
+    // If we receive a plain 401 (not refresh flow), ensure token cleared and redirect
+    if (error.response?.status === 401) {
+      clearAccessToken();
+      try { window.dispatchEvent(new Event("app:logout")); } catch (e) {}
+      window.location.href = "/login?sessionExpired=1";
     }
 
     return Promise.reject(error);
