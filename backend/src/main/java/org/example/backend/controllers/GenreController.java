@@ -72,17 +72,20 @@ public class GenreController {
             @PathVariable int id,
             @Valid @RequestBody CreateGenreRequest request
     ) {
-        if (genreRepository.existsByNameIgnoreCase(request.getName())) {
+        var genre = genreRepository.findById(id).orElse(null);
+        if(genre == null)
+            return ResponseEntity.notFound().build();
+
+        var requestedName = request.getName().trim();
+        boolean duplicateName = genreRepository.existsByNameIgnoreCase(requestedName)
+                && !genre.getName().equalsIgnoreCase(requestedName);
+        if (duplicateName) {
             return ResponseEntity.badRequest().body(
                     Map.of("message", "Genre already exists")
             );
         }
 
-        var genre = genreRepository.findById(id).orElse(null);
-        if(genre == null)
-            return ResponseEntity.notFound().build();
-
-        genre.setName(request.getName());
+        genre.setName(requestedName);
         genreRepository.save(genre);
         return ResponseEntity.ok().body(genreMapper.toDto(genre));
     }

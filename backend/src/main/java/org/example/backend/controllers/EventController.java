@@ -33,13 +33,18 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEvent(id));
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<EventDto>> getActiveEvents() {
+        return ResponseEntity.ok(eventService.getActiveEvents());
+    }
+
     @PostMapping
     public ResponseEntity<EventDto> createEvent(
             @Valid @RequestBody CreateEventRequest request,
             UriComponentsBuilder uriBuilder
     ) {
         var dto = eventService.createEvent(request);
-        var uri = uriBuilder.path("/api/employees/events/{id}").buildAndExpand(dto.getId()).toUri();
+        var uri = uriBuilder.path("/api/events/{id}").buildAndExpand(dto.getId()).toUri();
         return ResponseEntity.created(uri).body(dto);
     }
 

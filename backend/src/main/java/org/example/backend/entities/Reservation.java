@@ -41,15 +41,6 @@ public class Reservation {
     @Builder.Default
     private List<ReservationStall> reservationStalls = new ArrayList<>();
 
-    public void addStall(Stall stall) {
-        var link = new ReservationStall(this, stall, this.event,true);
-        reservationStalls.add(link);
-    }
-
-    public void removeStall(Stall stall) {
-        reservationStalls.removeIf(rs -> rs.getStall().getId().equals(stall.getId()));
-    }
-
     @ManyToMany
     @JoinTable(
             name = "reservation_genres",
@@ -58,8 +49,6 @@ public class Reservation {
     )
     @Builder.Default
     private Set<Genre> genres  = new HashSet<>();
-    public void addGenre(Genre genre){ genres.add(genre); }
-    public void removeGenre(Genre genre){ genres.remove(genre); }
 
     @PrePersist
     protected void onCreate() {

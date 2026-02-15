@@ -50,7 +50,7 @@ public class UserService  {
     public UserDto updateUser(UpdateUserRequest request) {
         var user = userRepository.findById(authService.getCurrentUserId()).orElseThrow(UserNotFoundException::new);
 
-        userMapper.update(request, user);
+        user.setBusinessName(request.getBusinessName().trim());
         userRepository.save(user);
 
         return  userMapper.toUserDto(user);

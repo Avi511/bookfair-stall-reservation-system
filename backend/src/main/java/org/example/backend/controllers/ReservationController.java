@@ -48,9 +48,9 @@ public class ReservationController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> cancelReservation(
-            @PathVariable(name = "id") Long reservatioId
+            @PathVariable(name = "id") Long reservationId
     ) {
-        var reservationDto =  reservationService.cancelReservation(authService.getCurrentUserId(), reservatioId);
+        var reservationDto =  reservationService.cancelReservation(authService.getCurrentUserId(), reservationId);
         return  ResponseEntity.ok(reservationDto);
     }
 
