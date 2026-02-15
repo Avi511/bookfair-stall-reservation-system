@@ -49,6 +49,9 @@ export default function EditReservation() {
 
         const resv = await getReservationById(id);
         if (!alive) return;
+        if (!resv) {
+          throw new Error("Reservation not found.");
+        }
 
         setReservation(resv);
 

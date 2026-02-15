@@ -2,17 +2,22 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import Loading from "../components/common/Loading";
-import { addGenre, getGenresByReservation } from "../api/genres.api";
+import {
+  getGenres,
+  getGenresByReservation,
+  updateReservationGenres,
+} from "../api/genres.api";
 
 export default function Genres() {
   const [searchParams] = useSearchParams();
   const reservationId = searchParams.get("reservationId");
 
   const [genres, setGenres] = useState([]);
-  const [name, setName] = useState("");
+  const [selectedGenreIds, setSelectedGenreIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const loadGenres = async () => {
     if (!reservationId) return;
@@ -20,9 +25,22 @@ export default function Genres() {
     try {
       setLoading(true);
       setError("");
+      setSuccess("");
 
-      const data = await getGenresByReservation(reservationId);
-      setGenres(Array.isArray(data) ? data : []);
+      const [allGenres, reservationGenres] = await Promise.all([
+        getGenres(),
+        getGenresByReservation(reservationId),
+      ]);
+
+      const genreList = Array.isArray(allGenres) ? allGenres : [];
+      const selected = Array.isArray(reservationGenres) ? reservationGenres : [];
+
+      setGenres(genreList);
+      setSelectedGenreIds(
+        selected
+          .map((g) => g?.id)
+          .filter((id) => Number.isInteger(id)),
+      );
     } catch (e) {
       const msg =
         e?.response?.data?.message ||
@@ -39,20 +57,25 @@ export default function Genres() {
     loadGenres();
   }, [reservationId]);
 
+  const onToggle = (id) => {
+    setSelectedGenreIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!reservationId || !name.trim()) return;
-
+    if (!reservationId) return;
     try {
       setSaving(true);
       setError("");
+      setSuccess("");
 
-      await addGenre({
+      await updateReservationGenres({
         reservationId: Number(reservationId),
-        name: name.trim(),
+        genreIds: selectedGenreIds,
       });
-      setName("");
-      await loadGenres();
+      setSuccess("Genres updated successfully.");
     } catch (e) {
       const msg =
         e?.response?.data?.message ||
@@ -92,35 +115,53 @@ export default function Genres() {
           {error}
         </div>
       )}
+      {success && (
+        <div className="px-4 py-3 mt-4 text-sm rounded-xl text-emerald-700 bg-emerald-50">
+          {success}
+        </div>
+      )}
 
-      <form
-        onSubmit={onSubmit}
-        className="flex flex-col gap-3 mt-6 sm:flex-row"
-      >
-        <input
-          type="text"
-          placeholder="Add a genre (e.g. Fiction)"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="flex-1 px-3 py-2 text-sm border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-          required
-        />
+      <form onSubmit={onSubmit} className="mt-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {genres.map((genre) => {
+            const id = genre?.id;
+            const label = genre?.name || `Genre ${id}`;
+            if (!Number.isInteger(id)) return null;
+
+            return (
+              <label
+                key={id}
+                className="flex items-center gap-3 p-3 bg-white border rounded-xl"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedGenreIds.includes(id)}
+                  onChange={() => onToggle(id)}
+                />
+                <span className="text-sm">{label}</span>
+              </label>
+            );
+          })}
+        </div>
+
         <button
           type="submit"
           disabled={saving}
-          className="px-4 py-2 text-sm text-white rounded-xl bg-[var(--color-primary)] hover:opacity-95 disabled:opacity-60"
+          className="px-4 py-2 mt-5 text-sm text-white rounded-xl bg-[var(--color-primary)] hover:opacity-95 disabled:opacity-60"
         >
-          {saving ? "Adding..." : "Add Genre"}
+          {saving ? "Saving..." : "Save Genres"}
         </button>
       </form>
 
       <div className="mt-6 space-y-3">
         {genres.length === 0 ? (
           <div className="p-6 text-sm text-gray-600 bg-white border rounded-2xl">
-            No genres added yet.
+            No genres found.
           </div>
         ) : (
-          genres.map((genre, index) => (
+          genres
+            .filter((genre) => selectedGenreIds.includes(genre?.id))
+            .map((genre, index) => (
             <div
               key={genre?.id || genre?.name || index}
               className="flex items-center justify-between p-4 bg-white border rounded-2xl"
@@ -136,10 +177,10 @@ export default function Genres() {
                 )}
               </div>
               <span className="px-3 py-1 text-xs text-gray-500 bg-gray-100 border rounded-full">
-                Added
+                Selected
               </span>
             </div>
-          ))
+            ))
         )}
       </div>
     </div>

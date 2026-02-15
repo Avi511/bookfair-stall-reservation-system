@@ -5,7 +5,7 @@ import api from "./axiosInstance";
  * payload: { eventId, stallIds: [..] }
  */
 export const createReservation = async ({ eventId, stallIds }) => {
-  const res = await api.post("/api/reservations", { eventId, stallIds });
+  const res = await api.post("/reservations", { eventId, stallIds });
   return res.data;
 };
 
@@ -14,7 +14,7 @@ export const createReservation = async ({ eventId, stallIds }) => {
  * params example: { eventId, status }
  */
 export const getMyReservations = async (params = {}) => {
-  const res = await api.get("/api/reservations/my", { params });
+  const res = await api.get("/reservations/me", { params });
   return res.data;
 };
 
@@ -23,7 +23,7 @@ export const getMyReservations = async (params = {}) => {
  * params example: { eventId, status }
  */
 export const getReservations = async (params = {}) => {
-  const res = await api.get("/api/reservations", { params });
+  const res = await api.get("/reservations", { params });
   return res.data;
 };
 
@@ -31,8 +31,9 @@ export const getReservations = async (params = {}) => {
  * Get reservation by id (user edit page, employee details)
  */
 export const getReservationById = async (id) => {
-  const res = await api.get(`/api/reservations/${id}`);
-  return res.data;
+  const res = await api.get("/reservations/me");
+  const list = Array.isArray(res.data) ? res.data : [];
+  return list.find((reservation) => String(reservation?.id) === String(id)) || null;
 };
 
 /**
@@ -40,7 +41,7 @@ export const getReservationById = async (id) => {
  * payload: { stallIds: [..] }
  */
 export const updateReservation = async (id, { stallIds }) => {
-  const res = await api.put(`/api/reservations/${id}`, { stallIds });
+  const res = await api.put(`/reservations/${id}/stalls`, { stallIds });
   return res.data;
 };
 
@@ -48,7 +49,7 @@ export const updateReservation = async (id, { stallIds }) => {
  * Cancel reservation (user)
  */
 export const cancelReservation = async (id) => {
-  // could be PATCH or PUT depending backend — change if needed
-  const res = await api.patch(`/api/reservations/${id}/cancel`);
+  // could be PATCH or PUT depending backend - change if needed
+  const res = await api.patch(`/reservations/${id}`);
   return res.data;
 };

@@ -7,6 +7,7 @@ import EmptyState from "../components/common/EmptyState";
 
 import { getStallsByEvent } from "../api/stalls.api";
 import { createReservation } from "../api/reservations.api";
+import { getActiveEvent } from "../api/events.api";
 
 export default function ReserveStalls() {
   const { eventId } = useParams();
@@ -28,7 +29,22 @@ export default function ReserveStalls() {
         setLoading(true);
         setError("");
 
-        const data = await getStallsByEvent(eventId);
+        let resolvedEventId = eventId;
+
+        if (!resolvedEventId) {
+          const active = await getActiveEvent();
+          const activeEvent = Array.isArray(active) ? active[0] : active;
+          resolvedEventId = activeEvent?.id;
+
+          if (resolvedEventId) {
+            navigate(`/reserve-stalls/${resolvedEventId}`, { replace: true });
+            return;
+          }
+
+          throw new Error("No active event available.");
+        }
+
+        const data = await getStallsByEvent(resolvedEventId);
         if (!alive) return;
 
         setStalls(Array.isArray(data) ? data : []);
