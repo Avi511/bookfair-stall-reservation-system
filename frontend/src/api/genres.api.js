@@ -1,27 +1,26 @@
 import api from "./axiosInstance";
 
 /**
- * Get genres for a reservation
- * example: GET /api/genres?reservationId=123
+ * Get all available genres
+ */
+export const getGenres = async () => {
+  const res = await api.get("/genres");
+  return res.data;
+};
+
+/**
+ * Get selected genres for a reservation
  */
 export const getGenresByReservation = async (reservationId) => {
-  const res = await api.get("/api/genres", { params: { reservationId } });
+  const res = await api.get(`/reservations/${reservationId}/genres`);
   return res.data;
 };
 
 /**
- * Add genre to reservation
- * payload: { reservationId, name }
+ * Replace reservation genres
+ * payload: { genreIds: [1,2,...] }
  */
-export const addGenre = async ({ reservationId, name }) => {
-  const res = await api.post("/api/genres", { reservationId, name });
-  return res.data;
-};
-
-/**
- * Delete genre (optional)
- */
-export const deleteGenre = async (genreId) => {
-  const res = await api.delete(`/api/genres/${genreId}`);
+export const updateReservationGenres = async ({ reservationId, genreIds }) => {
+  const res = await api.put(`/reservations/${reservationId}/genres`, { genreIds });
   return res.data;
 };
