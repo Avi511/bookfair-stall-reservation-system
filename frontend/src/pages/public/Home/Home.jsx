@@ -1,10 +1,72 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import StallMap from "../../../components/stalls/StallMap";
+import { getActiveEvent } from "../../../api/events.api";
+import { getStallsByEvent } from "../../../api/stalls.api";
+import { useAuth } from "../../../auth/AuthContext";
 
 const Home = () => {
-  const isLoggedIn =
-    Boolean(localStorage.getItem("token")) ||
-    Boolean(localStorage.getItem("accessToken"));
+  const { isAuthenticated } = useAuth();
+  const isLoggedIn = isAuthenticated;
+  const [mapStalls, setMapStalls] = useState([]);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [mapError, setMapError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    if (!isLoggedIn) return () => { alive = false; };
+
+    const loadMap = async () => {
+      try {
+        setMapLoading(true);
+        setMapError("");
+
+        const active = await getActiveEvent();
+        const activeEvent = Array.isArray(active) ? active[0] : active;
+        const eventId = Number(activeEvent?.id) || null;
+
+        if (!eventId) {
+          throw new Error("No active event available.");
+        }
+
+        const stalls = await getStallsByEvent(eventId);
+        if (!alive) return;
+        setMapStalls(Array.isArray(stalls) ? stalls : []);
+      } catch (e) {
+        if (!alive) return;
+        const raw =
+          e?.response?.data?.message ||
+          e?.response?.data?.error ||
+          e?.message ||
+          "Failed to load map.";
+        const text = String(raw || "").toLowerCase();
+        setMapError(
+          text.includes("active")
+            ? "No active event map is available right now."
+            : "Map preview is temporarily unavailable.",
+        );
+      } finally {
+        if (alive) setMapLoading(false);
+      }
+    };
+
+    loadMap();
+    return () => {
+      alive = false;
+    };
+  }, [isLoggedIn]);
+
+  const mapDisabledStallIds = useMemo(() => {
+    return mapStalls
+      .filter(
+        (s) =>
+          s.reserved === true ||
+          s.isReserved === true ||
+          (typeof s.reservationId === "number" && s.reservationId > 0) ||
+          (typeof s.reservedByReservationId === "number" && s.reservedByReservationId > 0),
+      )
+      .map((s) => s.id);
+  }, [mapStalls]);
 
   return (
     <div className="bg-slate-50 text-slate-900">
@@ -219,26 +281,44 @@ const Home = () => {
               Venue map preview
             </h2>
             <p className="mt-2 text-slate-600">
-              The reservation page displays an interactive map showing available
-              and reserved stalls.
+              Logged-in users can view the live map here. This preview is read-only.
             </p>
-            <div className="mt-6 grid grid-cols-6 gap-3">
-              {Array.from({ length: 24 }).map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-10 rounded-lg text-xs font-semibold flex items-center justify-center ${
-                    index % 7 === 0
-                      ? "bg-slate-300 text-slate-500"
-                      : "bg-accent/20 text-accent"
-                  }`}
-                >
-                  {String.fromCharCode(65 + index)}
+
+            {!isLoggedIn && (
+              <p className="mt-6 text-sm text-slate-600">
+                Login to view the live stall map.
+              </p>
+            )}
+
+            {isLoggedIn && mapError && (
+              <div className="px-3 py-2 mt-6 text-sm text-red-700 rounded-lg bg-red-50">
+                {mapError}
+              </div>
+            )}
+
+            {isLoggedIn && !mapError && mapLoading && (
+              <p className="mt-6 text-sm text-slate-600">Loading map preview...</p>
+            )}
+
+            {isLoggedIn && !mapError && !mapLoading && (
+              <div className="mt-6">
+                <StallMap
+                  stalls={mapStalls}
+                  selectedStallIds={[]}
+                  disabledStallIds={mapDisabledStallIds}
+                  highlightStallIds={[]}
+                  readOnly
+                />
+                <div className="mt-3">
+                  <Link
+                    to="/stall-map"
+                    className="inline-flex items-center px-4 py-2 text-sm font-semibold border rounded-xl bg-white hover:bg-slate-50"
+                  >
+                    Open Full Map
+                  </Link>
                 </div>
-              ))}
-            </div>
-            <p className="mt-4 text-xs text-slate-500">
-              Gray stalls represent reserved units. Green stalls are available.
-            </p>
+              </div>
+            )}
           </div>
         </div>
       </section>

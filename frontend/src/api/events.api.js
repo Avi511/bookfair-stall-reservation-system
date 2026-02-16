@@ -1,18 +1,24 @@
 import api from "./axiosInstance";
 
 /**
- * Get active event (public + user + employee)
+ * List events with optional filters.
+ * params example: { status: "ACTIVE", year: 2026 }
  */
-export const getActiveEvent = async () => {
-  const res = await api.get("/events/active");
+export const getEvents = async (params = {}) => {
+  const res = await api.get("/events", { params });
   return res.data;
 };
 
 /**
- * List all events (employee usually)
+ * Get active events via status filter (backend-aligned).
  */
-export const getEvents = async () => {
-  const res = await api.get("/events");
+export const getActiveEvent = async () => getEvents({ status: "ACTIVE" });
+
+/**
+ * Get event by id.
+ */
+export const getEventById = async (eventId) => {
+  const res = await api.get(`/events/${eventId}`);
   return res.data;
 };
 

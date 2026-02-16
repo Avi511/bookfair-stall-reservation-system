@@ -42,11 +42,3 @@ export const deleteStall = async (stallId) => {
   return res.data;
 };
 
-/**
- * Bulk save stall layout (employee)
- * payload: [{id, x, y, ...}, ...]
- */
-export const saveStallLayout = async (payload) => {
-  const res = await api.put("/stalls/layout", payload);
-  return res.data;
-};

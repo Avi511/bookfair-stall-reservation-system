@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BookOpen, Menu, X, ChevronRight } from "lucide-react";
 import toast from "react-hot-toast";
+import { useAuth } from "../../auth/AuthContext";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -16,16 +18,21 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const hasToken =
-    Boolean(localStorage.getItem("token")) ||
-    Boolean(localStorage.getItem("accessToken"));
-
-  const actionPath = hasToken ? "/reserve-stalls" : "/login";
-  const actionLabel = hasToken ? "Reserve Stall" : "Login";
+  const role = String(user?.role || "").toUpperCase();
+  const isEmployee = role === "EMPLOYEE" || role === "ROLE_EMPLOYEE";
+  const actionPath = !isAuthenticated
+    ? "/login"
+    : isEmployee
+      ? "/employee/stalls"
+      : "/reserve-stalls";
+  const actionLabel = !isAuthenticated
+    ? "Login"
+    : isEmployee
+      ? "Edit Stall Map"
+      : "Reserve Stall";
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("accessToken");
+    logout();
     setIsMobileMenuOpen(false);
     toast.success("Logged out successfully");
     navigate("/", { replace: true });
@@ -83,7 +90,7 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {hasToken && (
+            {isAuthenticated && (
               <button
                 type="button"
                 onClick={handleLogout}
@@ -141,7 +148,7 @@ const Navbar = () => {
             {actionLabel} <ChevronRight className="w-4 h-4" />
           </Link>
 
-          {hasToken && (
+          {isAuthenticated && (
             <button
               type="button"
               onClick={handleLogout}

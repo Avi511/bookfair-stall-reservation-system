@@ -3,7 +3,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "../api/axiosInstance";
 import { useAuth } from "../auth/AuthContext";
-import { decodeJwt, getRoleFromToken } from "../auth/jwt";
+import { decodeJwt } from "../auth/jwt";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -34,8 +34,6 @@ export default function Login() {
       login(token);
 
       const payload = decodeJwt(token);
-      const role = getRoleFromToken(token);
-
       let userName = payload?.businessName || payload?.name || payload?.sub;
       try {
         const meRes = await axios.get("/auth/me");
@@ -52,11 +50,7 @@ export default function Login() {
         return;
       }
 
-      if (role === "EMPLOYEE" || role === "ROLE_EMPLOYEE") {
-        navigate("/employee", { replace: true });
-      } else {
-        navigate("/me", { replace: true });
-      }
+      navigate("/", { replace: true });
     } catch (err) {
       const msg =
         err?.response?.data?.message ||

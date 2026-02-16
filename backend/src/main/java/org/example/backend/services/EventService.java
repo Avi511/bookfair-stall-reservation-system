@@ -60,10 +60,13 @@ public class EventService {
             throw new IllegalArgumentException("Ended events cannot be reactivated.");
         }
 
-        List<Event> activeEvents = eventRepository.findByStatus(EventStatus.ACTIVE);
-        int NUMBER_OF_ACTIVE_EVENTS = 1;
-        if (activeEvents.size() >= NUMBER_OF_ACTIVE_EVENTS) {
-            throw new IllegalArgumentException("Maximum number of active events reached.");
+        if (status == EventStatus.ACTIVE) {
+            List<Event> activeEvents = eventRepository.findByStatus(EventStatus.ACTIVE);
+            boolean anotherActiveExists = activeEvents.stream()
+                    .anyMatch(active -> !active.getId().equals(id));
+            if (anotherActiveExists) {
+                throw new IllegalArgumentException("Maximum number of active events reached.");
+            }
         }
 
         event.setStatus(status);
