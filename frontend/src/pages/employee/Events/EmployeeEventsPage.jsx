@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import Alert from "../../../components/common/Alert";
 import {
   createEvent,
   endEvent,
@@ -193,14 +194,8 @@ export default function EmployeeEventsPage() {
           </div>
         )}
 
-        {error && (
-          <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">{error}</div>
-        )}
-        {msg && (
-          <div className="px-4 py-3 mt-4 text-sm rounded-xl bg-emerald-50 text-emerald-700">
-            {msg}
-          </div>
-        )}
+        {error && <Alert type="error">{error}</Alert>}
+        {msg && <Alert type="success">{msg}</Alert>}
 
         <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
           <div className="lg:col-span-1">
