@@ -6,7 +6,7 @@ import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
 
 import { getStallsByEvent } from "../api/stalls.api";
-import { createReservation, getMyReservations } from "../api/reservations.api";
+import { createReservation } from "../api/reservations.api";
 import { getActiveEvent, getEvents } from "../api/events.api";
 
 export default function ReserveStalls() {
@@ -22,8 +22,6 @@ export default function ReserveStalls() {
   const [activeEventId, setActiveEventId] = useState(null);
   const [activeEventInfo, setActiveEventInfo] = useState(null);
   const [nextEvents, setNextEvents] = useState([]);
-  const [existingReservedStallIds, setExistingReservedStallIds] = useState([]);
-  const [reservedLoadError, setReservedLoadError] = useState("");
 
   const formatDate = (value) => {
     if (!value) return "-";
@@ -121,63 +119,6 @@ export default function ReserveStalls() {
     };
   }, []);
 
-  useEffect(() => {
-    let alive = true;
-
-    async function loadMyReservedStalls() {
-      if (!activeEventId) return;
-
-      try {
-        setReservedLoadError("");
-        let data;
-        try {
-          data = await getMyReservations({ eventId: activeEventId });
-        } catch {
-          data = await getMyReservations();
-        }
-        if (!alive) return;
-
-        const reservations = Array.isArray(data) ? data : [];
-        const reserved = new Set();
-
-        reservations.forEach((reservation) => {
-          const reservationEventId = Number(reservation?.eventId);
-          if (reservationEventId && reservationEventId !== Number(activeEventId)) {
-            return;
-          }
-
-          const status = String(reservation?.status || "").toUpperCase();
-          if (status === "CANCELLED") return;
-
-          if (Array.isArray(reservation?.stallIds)) {
-            reservation.stallIds.forEach((id) => {
-              const numericId = Number(id);
-              if (numericId) reserved.add(numericId);
-            });
-          }
-
-          if (Array.isArray(reservation?.stalls)) {
-            reservation.stalls.forEach((stall) => {
-              const numericId = Number(stall?.id);
-              if (numericId) reserved.add(numericId);
-            });
-          }
-        });
-
-        setExistingReservedStallIds(Array.from(reserved));
-      } catch {
-        if (!alive) return;
-        setExistingReservedStallIds([]);
-        setReservedLoadError("Unable to load your existing reserved stalls right now.");
-      }
-    }
-
-    loadMyReservedStalls();
-    return () => {
-      alive = false;
-    };
-  }, [activeEventId]);
-
   // Determine which stalls are reserved (disabled)
   const disabledStallIds = useMemo(() => {
     const disabled = [];
@@ -199,10 +140,6 @@ export default function ReserveStalls() {
     return new Map(stalls.map((s) => [s.id, s.stallCode || `Stall ${s.id}`]));
   }, [stalls]);
 
-  const maxAllowedStalls = 3;
-  const alreadyReservedCount = existingReservedStallIds.length;
-  const remainingSelectable = Math.max(0, maxAllowedStalls - alreadyReservedCount);
-
   // Toggle selection (max 3)
   function onToggleSelect(stallId) {
     setError("");
@@ -212,13 +149,8 @@ export default function ReserveStalls() {
 
       if (exists) return prev.filter((x) => x !== stallId);
 
-      if (remainingSelectable <= 0) {
-        setError("You already reserved the maximum 3 stalls.");
-        return prev;
-      }
-
-      if (prev.length >= remainingSelectable) {
-        setError(`You can select only ${remainingSelectable} more stall(s).`);
+      if (prev.length >= 3) {
+        setError("You can select maximum 3 stalls.");
         return prev;
       }
 
@@ -264,17 +196,9 @@ export default function ReserveStalls() {
         "Failed to create reservation.";
       const text = String(raw || "").toLowerCase();
       const msg =
-        text.includes("max") || text.includes("1 to 3") || text.includes("reserve 1 to 3")
-          ? "You already reached the maximum 3 stalls for this event."
-          : text.includes("event") && text.includes("not active")
-            ? "This event is not active for reservations."
-            : text.includes("event") && text.includes("end date")
-              ? "This event has ended, so reservations are closed."
-              : text.includes("invalid") && text.includes("stall")
-                ? "One or more selected stalls are invalid. Please refresh and try again."
-                : text.includes("already") || text.includes("taken")
-                  ? "Some selected stalls are no longer available. Please choose different stalls."
-                  : "Unable to confirm reservation right now. Please try again.";
+        text.includes("already") || text.includes("taken")
+          ? "Some selected stalls are no longer available. Please choose different stalls."
+          : "Unable to confirm reservation right now. Please try again.";
       setError(msg);
     } finally {
       setSaving(false);
@@ -378,36 +302,8 @@ export default function ReserveStalls() {
             </h2>
 
             <p className="mt-1 text-sm text-gray-600">
-              Selected: <span className="font-semibold">{selected.length}</span> / {remainingSelectable}
+              Selected: <span className="font-semibold">{selected.length}</span> / 3
             </p>
-            <p className="mt-1 text-sm text-gray-600">
-              Already Reserved: <span className="font-semibold">{alreadyReservedCount}</span> / {maxAllowedStalls}
-            </p>
-            {reservedLoadError && (
-              <p className="mt-1 text-xs text-amber-700">
-                {reservedLoadError}
-              </p>
-            )}
-
-            <div className="mt-3">
-              <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
-                Your Reserved Stalls
-              </p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {existingReservedStallIds.length === 0 ? (
-                  <span className="text-sm text-gray-500">No reserved stalls yet</span>
-                ) : (
-                  existingReservedStallIds.map((sid) => (
-                    <span
-                      key={`reserved-${sid}`}
-                      className="px-3 py-1 text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full"
-                    >
-                      {stallCodeById.get(sid) || `Stall ${sid}`}
-                    </span>
-                  ))
-                )}
-              </div>
-            </div>
 
             <div className="flex flex-wrap gap-2 mt-3">
               {selected.length === 0 ? (
@@ -426,14 +322,14 @@ export default function ReserveStalls() {
 
             <button
               onClick={onConfirm}
-              disabled={saving || selected.length === 0 || remainingSelectable <= 0}
+              disabled={saving}
               className="mt-5 w-full rounded-xl bg-[var(--color-primary)] text-white py-2.5 font-semibold hover:opacity-95 disabled:opacity-60"
             >
               {saving ? "Confirming..." : "Confirm Reservation"}
             </button>
 
             <p className="mt-3 text-xs text-gray-500">
-              Reserved stalls (grey) cannot be selected. You can reserve up to 3 stalls in total.
+              Reserved stalls (grey) cannot be selected. You can reserve up to 3 stalls.
             </p>
           </div>
         </div>

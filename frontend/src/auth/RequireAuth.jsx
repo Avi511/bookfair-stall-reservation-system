@@ -1,16 +1,12 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const RequireAuth = ({ children }) => {
-	const { isAuthenticated, isInitializing } = useAuth();
+	const { user } = useAuth();
 	const location = useLocation();
 
-	if (isInitializing) {
-		return null;
-	}
-
-	if (!isAuthenticated) {
+	if (!user) {
 		return <Navigate to="/login" replace state={{ from: location }} />;
 	}
 
