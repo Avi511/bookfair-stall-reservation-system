@@ -105,6 +105,12 @@ export default function EmployeeDashboard() {
           >
             Reservations
           </Link>
+          <Link
+            to="/employee/genres"
+            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
+          >
+            Genres
+          </Link>
         </div>
 
         <h1 className="text-2xl font-bold text-[var(--color-dark)]">
@@ -221,7 +227,7 @@ export default function EmployeeDashboard() {
           <h2 className="text-lg font-semibold text-[var(--color-dark)]">
             Quick Navigation
           </h2>
-          <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-4">
             <Link
               to="/employee/events"
               className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
@@ -305,6 +311,35 @@ export default function EmployeeDashboard() {
                     Reservations
                   </p>
                   <p className="text-xs text-gray-500">View all reservations</p>
+                </div>
+              </div>
+            </Link>
+
+            <Link
+              to="/employee/genres"
+              className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100">
+                  <svg
+                    className="w-5 h-5 text-emerald-700"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 8h10M7 12h6m-6 4h10M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-[var(--color-dark)]">
+                    Genres
+                  </p>
+                  <p className="text-xs text-gray-500">Manage genre catalog</p>
                 </div>
               </div>
             </Link>
