@@ -4,11 +4,7 @@ import { useAuth } from "./AuthContext";
 
 export default function RequireRole({ children, roles = [], redirectTo = "/login" }) {
   const location = useLocation();
-  const { isAuthenticated, isInitializing, user } = useAuth();
-
-  if (isInitializing) {
-    return null;
-  }
+  const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location }} />;

@@ -23,17 +23,15 @@ const clearToken = () => {
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     const stored = readStoredToken();
-    if (stored) {
-      const role = getRoleFromToken(stored);
-      const payload = decodeJwt(stored);
-      setToken(stored);
-      setUser({ role, payload });
-    }
-    setIsInitializing(false);
+    if (!stored) return;
+
+    const role = getRoleFromToken(stored);
+    const payload = decodeJwt(stored);
+    setToken(stored);
+    setUser({ role, payload });
   }, []);
 
   const login = (newToken) => {
@@ -57,11 +55,10 @@ export const AuthProvider = ({ children }) => {
       token,
       user,
       isAuthenticated: Boolean(token),
-      isInitializing,
       login,
       logout,
     }),
-    [token, user, isInitializing],
+    [token, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

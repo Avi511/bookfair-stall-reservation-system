@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
 import Home from '../pages/public/Home/Home';
 import About from '../pages/public/About/About';
@@ -17,7 +17,6 @@ import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import EmployeeStallsPage from '../pages/employee/EmployeeStallsPage';
 import EmployeeEventsPage from '../pages/employee/Events/EmployeeEventsPage';
 import EmployeeReservations from '../pages/employee/EmployeeReservations';
-import EmployeeGenresPage from '../pages/employee/EmployeeGenresPage';
 import NotFound from '../pages/NotFound';
 
 const AppRoutes = () => {
@@ -54,7 +53,7 @@ const AppRoutes = () => {
               }
             />
             <Route
-              path="/profile"
+              path="/me"
               element={
                 <RequireRole roles={["USER", "ROLE_USER"]} redirectTo="/">
                   <Profile />
@@ -74,21 +73,20 @@ const AppRoutes = () => {
 
             {/* employee area - protected routes */}
             <Route
-              path="/employee"
+              path="/employee/*"
               element={
                 <RequireAuth>
                   <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
-                    <Outlet />
+                    <EmployeeDashboard />
                   </RequireRole>
                 </RequireAuth>
               }
             >
-              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route index element={<EmployeeDashboard />} />
               <Route path="dashboard" element={<EmployeeDashboard />} />
               <Route path="stalls" element={<EmployeeStallsPage />} />
               <Route path="events" element={<EmployeeEventsPage />} />
               <Route path="reservations" element={<EmployeeReservations />} />
-              <Route path="genres" element={<EmployeeGenresPage />} />
             </Route>
 
             {/* catch-all should show 404 now */}

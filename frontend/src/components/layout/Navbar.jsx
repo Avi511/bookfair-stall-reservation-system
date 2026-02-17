@@ -30,12 +30,6 @@ const Navbar = () => {
     : isEmployee
       ? "Edit Stall Map"
       : "Reserve Stall";
-  const accountPath = isAuthenticated
-    ? isEmployee
-      ? "/employee/dashboard"
-      : "/profile"
-    : null;
-  const accountLabel = isEmployee ? "Employee Portal" : "My Page";
 
   const handleLogout = () => {
     logout();
@@ -96,15 +90,6 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {accountPath && (
-              <Link
-                to={accountPath}
-                className="inline-flex items-center px-5 py-2.5 font-semibold text-white/90 border border-white/30 rounded-lg hover:bg-white/10"
-              >
-                {accountLabel}
-              </Link>
-            )}
-
             {isAuthenticated && (
               <button
                 type="button"
@@ -162,16 +147,6 @@ const Navbar = () => {
           >
             {actionLabel} <ChevronRight className="w-4 h-4" />
           </Link>
-
-          {accountPath && (
-            <Link
-              to={accountPath}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-center w-full gap-2 px-4 py-3 text-base font-semibold text-white border rounded-lg border-white/30 hover:bg-white/10"
-            >
-              {accountLabel}
-            </Link>
-          )}
 
           {isAuthenticated && (
             <button

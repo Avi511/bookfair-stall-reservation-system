@@ -119,12 +119,6 @@ export default function EmployeeReservations() {
           >
             Reservations
           </Link>
-          <Link
-            to="/employee/genres"
-            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
-          >
-            Genres
-          </Link>
         </div>
 
         <h1 className="text-2xl font-bold text-[var(--color-dark)]">
