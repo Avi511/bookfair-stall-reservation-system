@@ -12,12 +12,12 @@ import Profile from '../pages/Profile';
 import EditReservation from '../pages/EditReservation';
 import StallMapViewer from '../pages/StallMapViewer';
 import RequireRole from '../auth/RequireRole';
+import RequireAuth from '../auth/RequireAuth';
+import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
 import EmployeeStallsPage from '../pages/employee/EmployeeStallsPage';
 import EmployeeEventsPage from '../pages/employee/Events/EmployeeEventsPage';
-// import EmployeeDashboard from '../pages/employee/EmployeeDashboard';
-// import EmployeeEvents from '../pages/employee/EmployeeEvents';
-// import EmployeeReservations from '../pages/employee/EmployeeReservations';
-// import EmployeeStallsPage from '../pages/employee/EmployeeStallsPage';
+import EmployeeReservations from '../pages/employee/EmployeeReservations';
+import NotFound from '../pages/NotFound';
 
 const AppRoutes = () => {
     return (
@@ -61,38 +61,6 @@ const AppRoutes = () => {
               }
             />
             <Route
-              path="/employee"
-              element={
-                <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
-                  <EmployeeStallsPage />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/edit"
-              element={
-                <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
-                  <EmployeeStallsPage />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/employee/stalls"
-              element={
-                <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
-                  <EmployeeStallsPage />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/employee/events"
-              element={
-                <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
-                  <EmployeeEventsPage />
-                </RequireRole>
-              }
-            />
-            <Route
               path="/edit-reservation/:id"
               element={
                 <RequireRole roles={["USER", "ROLE_USER"]} redirectTo="/">
@@ -103,12 +71,26 @@ const AppRoutes = () => {
             <Route path="/stall-map" element={<StallMapViewer />} />
             <Route path="/stall-map/:eventId" element={<StallMapViewer />} />
 
-            {/* <Route path="/employee" element={<EmployeeDashboard />} />
-            <Route path="/employee/events" element={<EmployeeEvents />} />
-            <Route path="/employee/reservations" element={<EmployeeReservations />} />
-            <Route path="/employee/stalls" element={<EmployeeStallsPage />} /> */}
+            {/* employee area - protected routes */}
+            <Route
+              path="/employee/*"
+              element={
+                <RequireAuth>
+                  <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
+                    <EmployeeDashboard />
+                  </RequireRole>
+                </RequireAuth>
+              }
+            >
+              <Route index element={<EmployeeDashboard />} />
+              <Route path="dashboard" element={<EmployeeDashboard />} />
+              <Route path="stalls" element={<EmployeeStallsPage />} />
+              <Route path="events" element={<EmployeeEventsPage />} />
+              <Route path="reservations" element={<EmployeeReservations />} />
+            </Route>
 
-            <Route path="*" element={<Home />} />
+            {/* catch-all should show 404 now */}
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 };
