@@ -170,6 +170,12 @@ export default function EmployeeEventsPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <Link
+            to="/employee/dashboard"
+            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
+          >
+            Dashboard
+          </Link>
+          <Link
             to="/employee/stalls"
             className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
           >
@@ -180,6 +186,18 @@ export default function EmployeeEventsPage() {
             className="px-3 py-1.5 text-sm font-semibold border rounded-lg bg-white"
           >
             Events
+          </Link>
+          <Link
+            to="/employee/reservations"
+            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
+          >
+            Reservations
+          </Link>
+          <Link
+            to="/employee/genres"
+            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
+          >
+            Genres
           </Link>
         </div>
 
