@@ -20,42 +20,6 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    public void sendEmail(String to, String businessName, String stall) {
-        try {
-            String subject = "Reservation Confirmed";
-            String resolvedStall = (stall == null || stall.isBlank()) ? "N/A" : stall;
-            String html = """
-                    <div style="font-family:Arial,sans-serif;">
-                      <h2>Reservation Confirmed</h2>
-                      <p>Hello %s,</p>
-                      <p>Your reservation is confirmed.</p>
-                      <ul>
-                        <li><b>Stall:</b> %s</li>
-                      </ul>
-                      <p>Thank you.</p>
-                    </div>
-                    """.formatted(
-                    safe(businessName),
-                    resolvedStall
-            );
-
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
-                    message,
-                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-                    StandardCharsets.UTF_8.name()
-            );
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(html, true);
-
-            mailSender.send(message);
-        } catch (Exception e) {
-            System.err.println("Email sending failed: " + e.getMessage());
-        }
-    }
-
     public void sendReservationConfirmation(User user, Reservation reservation, byte[] qrPng) {
         try {
             String stallList = reservation.getReservationStalls()
@@ -108,23 +72,6 @@ public class EmailService {
 
         } catch (Exception e) {
             // IMPORTANT: do not break reservation flow
-            System.err.println("Email sending failed: " + e.getMessage());
-        }
-    }
-    public void sendSimpleQrEmail(String to, String token, byte[] qrPng) {
-        try {
-            var message = mailSender.createMimeMessage();
-            var helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(to);
-            helper.setSubject("QR Test - Book Fair");
-            helper.setText("<p>Token: <b>" + token + "</b></p><img src='cid:qrImage'/>", true);
-
-            helper.addInline("qrImage", new ByteArrayResource(qrPng), "image/png");
-            helper.addAttachment("qr.png", new ByteArrayResource(qrPng), "image/png");
-
-            mailSender.send(message);
-        } catch (Exception e) {
             System.err.println("Email sending failed: " + e.getMessage());
         }
     }

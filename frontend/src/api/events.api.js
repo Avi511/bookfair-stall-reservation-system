@@ -1,18 +1,24 @@
 import api from "./axiosInstance";
 
 /**
- * Get active event (public + user + employee)
+ * List events with optional filters.
+ * params example: { status: "ACTIVE", year: 2026 }
  */
-export const getActiveEvent = async () => {
-  const res = await api.get("/api/events/active");
+export const getEvents = async (params = {}) => {
+  const res = await api.get("/events", { params });
   return res.data;
 };
 
 /**
- * List all events (employee usually)
+ * Get active events via status filter (backend-aligned).
  */
-export const getEvents = async () => {
-  const res = await api.get("/api/events");
+export const getActiveEvent = async () => getEvents({ status: "ACTIVE" });
+
+/**
+ * Get event by id.
+ */
+export const getEventById = async (eventId) => {
+  const res = await api.get(`/events/${eventId}`);
   return res.data;
 };
 
@@ -21,7 +27,7 @@ export const getEvents = async () => {
  */
 export const createEvent = async (payload) => {
   // payload: { name, year, startDate, endDate, status }
-  const res = await api.post("/api/events", payload);
+  const res = await api.post("/events", payload);
   return res.data;
 };
 
@@ -29,7 +35,7 @@ export const createEvent = async (payload) => {
  * Update event (employee)
  */
 export const updateEvent = async (eventId, payload) => {
-  const res = await api.put(`/api/events/${eventId}`, payload);
+  const res = await api.put(`/events/${eventId}`, payload);
   return res.data;
 };
 
@@ -37,7 +43,7 @@ export const updateEvent = async (eventId, payload) => {
  * Set active event (employee) - only 1 should be active
  */
 export const setActiveEvent = async (eventId) => {
-  const res = await api.put(`/api/events/${eventId}/activate`);
+  const res = await api.patch(`/events/${eventId}/status`, { status: "ACTIVE" });
   return res.data;
 };
 
@@ -45,6 +51,6 @@ export const setActiveEvent = async (eventId) => {
  * End event (employee)
  */
 export const endEvent = async (eventId) => {
-  const res = await api.put(`/api/events/${eventId}/end`);
+  const res = await api.patch(`/events/${eventId}/status`, { status: "ENDED" });
   return res.data;
 };

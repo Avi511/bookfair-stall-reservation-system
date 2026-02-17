@@ -9,8 +9,6 @@ import org.example.backend.config.JwtConfig;
 import org.example.backend.dtos.JwtResponse;
 import org.example.backend.dtos.LoginRequest;
 import org.example.backend.dtos.UserDto;
-import org.example.backend.mappers.UserMapper;
-import org.example.backend.repositories.UserRepository;
 import org.example.backend.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

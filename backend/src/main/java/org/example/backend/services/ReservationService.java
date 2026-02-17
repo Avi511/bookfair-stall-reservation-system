@@ -11,6 +11,8 @@ import org.example.backend.mappers.ReservationMapper;
 import org.example.backend.repositories.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -44,11 +46,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public List<ReservationDto> listReservationsByEvent(Integer eventId) {
-        return listReservationsFiltered(eventId, null, null);
-    }
-
-    @Transactional
     public List<ReservationDto> listReservationsFiltered(Integer eventId, ReservationStatus status, Long userId) {
         if (eventId != null) {
             eventRepository.findById(eventId)
@@ -74,6 +71,7 @@ public class ReservationService {
         if (event.getStatus() != EventStatus.ACTIVE) {
             throw new IllegalArgumentException("Event is not active.");
         }
+        ensureEventNotEnded(event);
 
         var requestedStallIds = request.getStallIds().stream().distinct().toList();
         if(requestedStallIds.isEmpty() || requestedStallIds.size() > MAXIMUM_STALLS_PER_USER) {
@@ -128,13 +126,11 @@ public class ReservationService {
 
     @Transactional
     public ReservationDto cancelReservation(Long userId, Long reservationId) {
-        var reservation = reservationRepository.findById(reservationId).orElseThrow(
-                () -> new IllegalArgumentException("Reservation not found")
+        var reservation = requireOwnedReservation(
+                userId,
+                reservationId,
+                "User can only cancel own reservation."
         );
-
-        if(!reservation.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User can only cancel own reservation.");
-        }
 
         if(reservation.getStatus() == ReservationStatus.CANCELLED) {
             return reservationMapper.toDto(reservation);
@@ -152,22 +148,10 @@ public class ReservationService {
     public ReservationDto updateReservation(Long userId, Long reservationId, List<Long> newStallIds) {
         final int MAX_STALLS_PER_USER = 3;
 
-        var reservation = reservationRepository.findById(reservationId).orElseThrow(
-                () -> new IllegalArgumentException("Reservation not found")
+        var reservation = requireOwnedConfirmedActiveReservation(
+                userId,
+                reservationId
         );
-
-        if (!reservation.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User can only update own reservation.");
-
-        }
-
-        if(reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new IllegalArgumentException("Reservation is not confirmed.");
-        }
-
-        if(reservation.getEvent().getStatus() != EventStatus.ACTIVE) {
-            throw new IllegalArgumentException("Event is not active.");
-        }
 
         var distinctNew = newStallIds.stream().distinct().toList();
         if(distinctNew.isEmpty() || distinctNew.size() > MAX_STALLS_PER_USER) {
@@ -225,21 +209,10 @@ public class ReservationService {
 
     @Transactional
     public List<GenreDto> addReservationGenres(Long userId, Long reservationId, List<Integer> genreIds) {
-        var reservation = reservationRepository.findById(reservationId).orElseThrow(
-                () -> new IllegalArgumentException("Reservation not found")
+        var reservation = requireOwnedConfirmedActiveReservation(
+                userId,
+                reservationId
         );
-
-        if (!reservation.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User can only update own reservation.");
-        }
-
-        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new IllegalArgumentException("Reservation is not confirmed.");
-        }
-
-        if (reservation.getEvent().getStatus() != EventStatus.ACTIVE) {
-            throw new IllegalArgumentException("Event is not active.");
-        }
 
         var distinctIds = genreIds.stream().distinct().toList();
         if (distinctIds.isEmpty()) {
@@ -261,17 +234,43 @@ public class ReservationService {
 
     @Transactional
     public List<GenreDto> listReservationGenres(Long userId, Long reservationId) {
+        var reservation = requireOwnedReservation(
+                userId,
+                reservationId,
+                "User can only view own reservation."
+        );
+
+        return reservation.getGenres().stream()
+                .map(genreMapper::toDto)
+                .toList();
+    }
+
+    private Reservation requireOwnedConfirmedActiveReservation(Long userId, Long reservationId) {
+        var reservation = requireOwnedReservation(userId, reservationId, "User can only update own reservation.");
+
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            throw new IllegalArgumentException("Reservation is not confirmed.");
+        }
+
+        if (reservation.getEvent().getStatus() != EventStatus.ACTIVE) {
+            throw new IllegalArgumentException("Event is not active.");
+        }
+
+        ensureEventNotEnded(reservation.getEvent());
+
+        return reservation;
+    }
+
+    private Reservation requireOwnedReservation(Long userId, Long reservationId, String notOwnerMessage) {
         var reservation = reservationRepository.findById(reservationId).orElseThrow(
                 () -> new IllegalArgumentException("Reservation not found")
         );
 
         if (!reservation.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User can only view own reservation.");
+            throw new IllegalArgumentException(notOwnerMessage);
         }
 
-        return reservation.getGenres().stream()
-                .map(genreMapper::toDto)
-                .toList();
+        return reservation;
     }
 
     private void sendReservationQr(User user, Reservation reservation) {
@@ -281,6 +280,18 @@ public class ReservationService {
             emailService.sendReservationConfirmation(user, reservation, qrPng);
         } catch (Exception e) {
             System.err.println("QR email failed: " + e.getMessage());
+        }
+    }
+
+    private void ensureEventNotEnded(Event event) {
+        var endDate = event.getEndDate();
+        if (endDate == null) {
+            return;
+        }
+        var today = LocalDate.now(ZoneId.systemDefault());
+        var endLocalDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        if (endLocalDate.isBefore(today)) {
+            throw new IllegalArgumentException("Event end date has passed.");
         }
     }
 

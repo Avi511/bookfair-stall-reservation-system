@@ -7,6 +7,7 @@ import EmptyState from "../components/common/EmptyState";
 
 import { getStallsByEvent } from "../api/stalls.api";
 import { createReservation } from "../api/reservations.api";
+import { getActiveEvent, getEvents } from "../api/events.api";
 
 export default function ReserveStalls() {
   const { eventId } = useParams();
@@ -18,6 +19,16 @@ export default function ReserveStalls() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [activeEventId, setActiveEventId] = useState(null);
+  const [activeEventInfo, setActiveEventInfo] = useState(null);
+  const [nextEvents, setNextEvents] = useState([]);
+
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "-";
+    return d.toLocaleDateString();
+  };
 
   // Fetch stalls for the event
   useEffect(() => {
@@ -28,16 +39,38 @@ export default function ReserveStalls() {
         setLoading(true);
         setError("");
 
-        const data = await getStallsByEvent(eventId);
+        let resolvedEventId = eventId;
+
+        if (!resolvedEventId) {
+          const active = await getActiveEvent();
+          const activeEvent = Array.isArray(active) ? active[0] : active;
+          resolvedEventId = activeEvent?.id;
+        }
+
+        if (!resolvedEventId) {
+          throw new Error("No active event available.");
+        }
+
+        const numericEventId = Number(resolvedEventId);
+        if (!numericEventId) {
+          throw new Error("Invalid event.");
+        }
+
+        setActiveEventId(numericEventId);
+        const data = await getStallsByEvent(resolvedEventId);
         if (!alive) return;
 
         setStalls(Array.isArray(data) ? data : []);
       } catch (e) {
-        const msg =
+        const raw =
           e?.response?.data?.message ||
           e?.response?.data?.error ||
           e?.message ||
           "Failed to load stalls.";
+        const text = String(raw || "").toLowerCase();
+        const msg = text.includes("active")
+          ? "No active event is available right now."
+          : "Unable to load the stall map. Please try again.";
         setError(msg);
       } finally {
         if (alive) setLoading(false);
@@ -49,6 +82,42 @@ export default function ReserveStalls() {
       alive = false;
     };
   }, [eventId]);
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadEventInfo() {
+      try {
+        const [activeRes, eventsRes] = await Promise.all([getActiveEvent(), getEvents()]);
+        if (!alive) return;
+
+        const active = Array.isArray(activeRes) ? activeRes[0] : activeRes;
+        const allEvents = Array.isArray(eventsRes) ? eventsRes : [];
+        const now = new Date();
+
+        const upcoming = allEvents
+          .filter((e) => e?.id && e?.id !== active?.id)
+          .filter((e) => {
+            const start = e?.startDate ? new Date(e.startDate) : null;
+            return start && !Number.isNaN(start.getTime()) && start > now;
+          })
+          .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))
+          .slice(0, 3);
+
+        setActiveEventInfo(active || null);
+        setNextEvents(upcoming);
+      } catch {
+        if (!alive) return;
+        setActiveEventInfo(null);
+        setNextEvents([]);
+      }
+    }
+
+    loadEventInfo();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   // Determine which stalls are reserved (disabled)
   const disabledStallIds = useMemo(() => {
@@ -65,6 +134,10 @@ export default function ReserveStalls() {
     }
 
     return disabled;
+  }, [stalls]);
+
+  const stallCodeById = useMemo(() => {
+    return new Map(stalls.map((s) => [s.id, s.stallCode || `Stall ${s.id}`]));
   }, [stalls]);
 
   // Toggle selection (max 3)
@@ -98,7 +171,7 @@ export default function ReserveStalls() {
       setSaving(true);
 
       const res = await createReservation({
-        eventId: Number(eventId),
+        eventId: Number(eventId) || activeEventId,
         stallIds: selected,
       });
 
@@ -116,11 +189,16 @@ export default function ReserveStalls() {
       // ✅ Redirect to genres page
       navigate(`/genres?reservationId=${newId}`, { replace: true });
     } catch (e) {
-      const msg =
+      const raw =
         e?.response?.data?.message ||
         e?.response?.data?.error ||
         e?.message ||
         "Failed to create reservation.";
+      const text = String(raw || "").toLowerCase();
+      const msg =
+        text.includes("already") || text.includes("taken")
+          ? "Some selected stalls are no longer available. Please choose different stalls."
+          : "Unable to confirm reservation right now. Please try again.";
       setError(msg);
     } finally {
       setSaving(false);
@@ -148,9 +226,6 @@ export default function ReserveStalls() {
           <h1 className="text-2xl font-bold text-[var(--color-dark)]">
             Reserve Stalls
           </h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Event ID: <span className="font-semibold">{eventId}</span>
-          </p>
         </div>
 
         <button
@@ -166,6 +241,48 @@ export default function ReserveStalls() {
           {error}
         </div>
       )}
+
+      <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
+        <div className="p-4 border rounded-2xl bg-white">
+          <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+            Current Active Event
+          </p>
+          {activeEventInfo ? (
+            <>
+              <p className="mt-1 text-base font-semibold text-[var(--color-dark)]">
+                {activeEventInfo.name || `Event #${activeEventInfo.id}`}
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                {formatDate(activeEventInfo.startDate)} to {formatDate(activeEventInfo.endDate)}
+              </p>
+            </>
+          ) : (
+            <p className="mt-1 text-sm text-gray-600">No active event right now.</p>
+          )}
+        </div>
+
+        <div className="p-4 border rounded-2xl bg-white">
+          <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+            Next Events
+          </p>
+          {nextEvents.length === 0 ? (
+            <p className="mt-1 text-sm text-gray-600">No upcoming events found.</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {nextEvents.map((ev) => (
+                <div key={ev.id} className="text-sm">
+                  <p className="font-semibold text-[var(--color-dark)]">
+                    {ev.name || `Event #${ev.id}`}
+                  </p>
+                  <p className="text-gray-600">
+                    {formatDate(ev.startDate)} to {formatDate(ev.endDate)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
@@ -197,7 +314,7 @@ export default function ReserveStalls() {
                     key={sid}
                     className="px-3 py-1 text-sm bg-gray-100 border rounded-full"
                   >
-                    #{sid}
+                    {stallCodeById.get(sid) || `Stall ${sid}`}
                   </span>
                 ))
               )}

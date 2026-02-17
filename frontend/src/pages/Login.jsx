@@ -2,26 +2,13 @@ import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "../api/axiosInstance";
-
-function parseJwt(token) {
-  try {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
+import { useAuth } from "../auth/AuthContext";
+import { decodeJwt } from "../auth/jwt";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -44,12 +31,9 @@ export default function Login() {
       const token = res.data?.token || res.data?.accessToken;
       if (!token) throw new Error("Token not found in response");
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("accessToken", token);
+      login(token);
 
-      const payload = parseJwt(token);
-      const role = payload?.role || payload?.roles?.[0];
-
+      const payload = decodeJwt(token);
       let userName = payload?.businessName || payload?.name || payload?.sub;
       try {
         const meRes = await axios.get("/auth/me");
@@ -66,11 +50,7 @@ export default function Login() {
         return;
       }
 
-      if (role === "EMPLOYEE" || role === "ROLE_EMPLOYEE") {
-        navigate("/employee", { replace: true });
-      } else {
-        navigate("/me", { replace: true });
-      }
+      navigate("/", { replace: true });
     } catch (err) {
       const msg =
         err?.response?.data?.message ||
@@ -138,7 +118,10 @@ export default function Login() {
 
         <div className="mt-4 text-sm text-gray-700">
           Don&apos;t have an account?{" "}
-          <Link className="font-semibold text-[var(--color-primary)]" to="/register">
+          <Link
+            className="font-semibold text-[var(--color-primary)]"
+            to="/register"
+          >
             Register
           </Link>
         </div>

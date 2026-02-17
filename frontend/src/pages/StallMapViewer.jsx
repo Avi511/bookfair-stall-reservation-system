@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import StallMap from "../components/stalls/StallMap";
 import Loading from "../components/common/Loading";
 import { getStallsByEvent } from "../api/stalls.api";
+import { getActiveEvent } from "../api/events.api";
 
 export default function StallMapViewer() {
-  const { eventId } = useParams();
-  const eventIdValue = useMemo(() => Number(eventId) || null, [eventId]);
-
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -16,25 +14,30 @@ export default function StallMapViewer() {
     let alive = true;
 
     async function run() {
-      if (!eventIdValue) {
-        setError("Invalid event id.");
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
         setError("");
-        const data = await getStallsByEvent(eventIdValue);
+        const active = await getActiveEvent();
+        const activeEvent = Array.isArray(active) ? active[0] : active;
+        const activeEventId = Number(activeEvent?.id) || null;
+        if (!activeEventId) {
+          throw new Error("No active event available.");
+        }
+
+        const data = await getStallsByEvent(activeEventId);
         if (!alive) return;
         setStalls(Array.isArray(data) ? data : []);
       } catch (e) {
         if (!alive) return;
-        const msg =
+        const raw =
           e?.response?.data?.message ||
           e?.response?.data?.error ||
           e?.message ||
           "Failed to load stalls.";
+        const text = String(raw || "").toLowerCase();
+        const msg = text.includes("active")
+          ? "No active event is available right now."
+          : "Unable to load the map right now. Please try again.";
         setError(msg);
       } finally {
         if (alive) setLoading(false);
@@ -45,7 +48,7 @@ export default function StallMapViewer() {
     return () => {
       alive = false;
     };
-  }, [eventIdValue]);
+  }, []);
 
   const disabledStallIds = useMemo(() => {
     return stalls
@@ -69,10 +72,6 @@ export default function StallMapViewer() {
           Home
         </Link>
       </div>
-
-      <p className="mt-1 text-sm text-gray-600">
-        Event ID: <span className="font-semibold">{eventIdValue ?? "-"}</span>
-      </p>
 
       {error && (
         <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">

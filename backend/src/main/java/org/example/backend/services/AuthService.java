@@ -8,6 +8,7 @@ import org.example.backend.exceptions.UnauthorizedException;
 import org.example.backend.exceptions.UserNotFoundException;
 import org.example.backend.mappers.UserMapper;
 import org.example.backend.repositories.UserRepository;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,14 +23,15 @@ public class AuthService {
     private final UserMapper userMapper;
 
     public AuthTokens login(LoginRequest request) {
+        var normalizedEmail = request.getEmail().trim().toLowerCase();
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        normalizedEmail,
                         request.getPassword()
                 )
         );
 
-        var user = userRepository.findByEmail(request.getEmail())
+        var user = userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(UserNotFoundException::new);
         var accessToken = jwtService.generateAccessToken(user).toString();
         var refreshToken = jwtService.generateRefreshToken(user).toString();
@@ -53,6 +55,17 @@ public class AuthService {
 
     public Long getCurrentUserId() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (Long) authentication.getPrincipal();
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new UnauthorizedException("Authentication required.");
+        }
+
+        var principal = authentication.getPrincipal();
+        if (principal instanceof Long userId) {
+            return userId;
+        }
+
+        throw new UnauthorizedException("Invalid authentication principal.");
     }
 }

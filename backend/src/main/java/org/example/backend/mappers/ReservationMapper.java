@@ -2,7 +2,6 @@ package org.example.backend.mappers;
 
 import org.example.backend.dtos.ReservationDto;
 import org.example.backend.entities.Reservation;
-import org.example.backend.entities.ReservationStall;
 import org.example.backend.entities.ReservationStatus;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;

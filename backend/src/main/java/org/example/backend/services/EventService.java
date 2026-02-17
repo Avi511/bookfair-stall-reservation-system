@@ -10,7 +10,6 @@ import org.example.backend.mappers.EventMapper;
 import org.example.backend.repositories.EventRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -22,11 +21,7 @@ public class EventService {
     private final EventMapper eventMapper;
 
     public List<EventDto> listEvents(EventStatus status, Integer year) {
-        return eventRepository.findAll().stream()
-                .filter(event -> status == null || event.getStatus() == status)
-                .filter(event -> year == null || year.equals(event.getYear()))
-                .sorted(Comparator.comparing(Event::getYear).reversed()
-                        .thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER))
+        return eventRepository.findAllWithFilters(status, year).stream()
                 .map(eventMapper::toDto)
                 .toList();
     }
@@ -65,6 +60,15 @@ public class EventService {
             throw new IllegalArgumentException("Ended events cannot be reactivated.");
         }
 
+        if (status == EventStatus.ACTIVE) {
+            List<Event> activeEvents = eventRepository.findByStatus(EventStatus.ACTIVE);
+            boolean anotherActiveExists = activeEvents.stream()
+                    .anyMatch(active -> !active.getId().equals(id));
+            if (anotherActiveExists) {
+                throw new IllegalArgumentException("Maximum number of active events reached.");
+            }
+        }
+
         event.setStatus(status);
         event = eventRepository.save(event);
         return eventMapper.toDto(event);
@@ -85,13 +89,17 @@ public class EventService {
     }
 
     private void ensureUniqueNameYear(String name, Integer year, Integer eventId) {
-        boolean exists = eventRepository.findAll().stream()
-                .anyMatch(event -> event.getName().equalsIgnoreCase(name)
-                        && event.getYear().equals(year)
-                        && (eventId == null || !event.getId().equals(eventId)));
+        boolean exists = eventId == null
+                ? eventRepository.existsByNameIgnoreCaseAndYear(name, year)
+                : eventRepository.existsByNameIgnoreCaseAndYearAndIdNot(name, year, eventId);
 
         if (exists) {
             throw new IllegalArgumentException("Event name and year must be unique.");
         }
+    }
+
+    public List<EventDto> getActiveEvents() {
+        List<Event> activeEvents = eventRepository.findByStatus(EventStatus.ACTIVE);
+        return eventMapper.toDto(activeEvents);
     }
 }
