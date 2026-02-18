@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Menu, X, ChevronRight } from "lucide-react";
+import { BookOpen, Menu, X, ChevronRight, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -20,22 +20,15 @@ const Navbar = () => {
 
   const role = String(user?.role || "").toUpperCase();
   const isEmployee = role === "EMPLOYEE" || role === "ROLE_EMPLOYEE";
-  const actionPath = !isAuthenticated
-    ? "/login"
-    : isEmployee
-      ? "/employee/stalls"
-      : "/reserve-stalls";
-  const actionLabel = !isAuthenticated
-    ? "Login"
-    : isEmployee
-      ? "Edit Stall Map"
-      : "Reserve Stall";
+  const showPrimaryAction = !isAuthenticated || !isEmployee;
+  const actionPath = !isAuthenticated ? "/login" : "/reserve-stalls";
+  const actionLabel = !isAuthenticated ? "Login" : "Reserve Stall";
   const accountPath = isAuthenticated
     ? isEmployee
       ? "/employee/dashboard"
       : "/profile"
     : null;
-  const accountLabel = isEmployee ? "Employee Portal" : "My Page";
+  const accountLabel = isEmployee ? "Employee Portal" : "Profile";
 
   const handleLogout = () => {
     logout();
@@ -86,22 +79,29 @@ const Navbar = () => {
               </Link>
             ))}
 
-            <Link
-              to={actionPath}
-              className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-secondary to-accent hover:scale-105"
-            >
-              <span className="relative flex items-center gap-2">
-                {actionLabel}
-                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </span>
-            </Link>
+            {showPrimaryAction && (
+              <Link
+                to={actionPath}
+                className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-secondary to-accent hover:scale-105"
+              >
+                <span className="relative flex items-center gap-2">
+                  {actionLabel}
+                  <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </span>
+              </Link>
+            )}
 
             {accountPath && (
               <Link
                 to={accountPath}
-                className="inline-flex items-center px-5 py-2.5 font-semibold text-white/90 border border-white/30 rounded-lg hover:bg-white/10"
+                aria-label={accountLabel}
+                className={`inline-flex items-center font-semibold text-white/90 border border-white/30 hover:bg-white/10 ${
+                  isEmployee
+                    ? "px-5 py-2.5 rounded-lg"
+                    : "p-2.5 rounded-full"
+                }`}
               >
-                {accountLabel}
+                {isEmployee ? accountLabel : <User className="w-5 h-5" />}
               </Link>
             )}
 
@@ -155,13 +155,15 @@ const Navbar = () => {
             </Link>
           ))}
 
-          <Link
-            to={actionPath}
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="flex items-center justify-center w-full gap-2 px-4 py-3 mt-4 text-base font-semibold text-white rounded-lg bg-gradient-to-r from-secondary to-accent active:scale-95"
-          >
-            {actionLabel} <ChevronRight className="w-4 h-4" />
-          </Link>
+          {showPrimaryAction && (
+            <Link
+              to={actionPath}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-center w-full gap-2 px-4 py-3 mt-4 text-base font-semibold text-white rounded-lg bg-gradient-to-r from-secondary to-accent active:scale-95"
+            >
+              {actionLabel} <ChevronRight className="w-4 h-4" />
+            </Link>
+          )}
 
           {accountPath && (
             <Link
@@ -169,7 +171,7 @@ const Navbar = () => {
               onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center justify-center w-full gap-2 px-4 py-3 text-base font-semibold text-white border rounded-lg border-white/30 hover:bg-white/10"
             >
-              {accountLabel}
+              {isEmployee ? accountLabel : <User className="w-5 h-5" />}
             </Link>
           )}
 

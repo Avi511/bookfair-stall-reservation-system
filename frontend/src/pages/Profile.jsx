@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { getMyReservations, cancelReservation } from "../api/reservations.api";
 import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
@@ -6,8 +7,6 @@ import EmptyState from "../components/common/EmptyState";
 export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [reservations, setReservations] = useState([]);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [cancelingId, setCancelingId] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(null);
 
@@ -16,16 +15,14 @@ export default function Profile() {
     async function run() {
       try {
         setLoading(true);
-        setError("");
         const data = await getMyReservations();
         if (!alive) return;
         setReservations(Array.isArray(data) ? data : []);
       } catch (e) {
-        setError(
-          e?.response?.data?.message ||
-            e?.message ||
-            "Failed to load reservations",
-        );
+        // API errors are shown globally by axios interceptor toast handling.
+        if (!e?.response) {
+          toast.error(e?.message || "Failed to load reservations");
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -39,18 +36,15 @@ export default function Profile() {
   const handleCancelReservation = async (reservationId) => {
     try {
       setCancelingId(reservationId);
-      setError("");
       await cancelReservation(reservationId);
       setReservations(reservations.filter((r) => r.id !== reservationId));
-      setSuccess("Reservation cancelled successfully");
+      toast.success("Reservation cancelled successfully");
       setShowCancelModal(null);
-      setTimeout(() => setSuccess(""), 3000);
     } catch (e) {
-      setError(
-        e?.response?.data?.message ||
-          e?.message ||
-          "Failed to cancel reservation",
-      );
+      // API errors are shown globally by axios interceptor toast handling.
+      if (!e?.response) {
+        toast.error(e?.message || "Failed to cancel reservation");
+      }
     } finally {
       setCancelingId(null);
     }
@@ -92,18 +86,6 @@ export default function Profile() {
           View and manage your stall reservations
         </p>
       </div>
-
-      {error && (
-        <div className="mb-6 p-4 text-sm text-red-700 rounded-lg bg-red-50 border border-red-200">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-6 p-4 text-sm text-green-700 rounded-lg bg-green-50 border border-green-200">
-          {success}
-        </div>
-      )}
 
       <div className="space-y-6">
         {reservations.map((reservation) => (

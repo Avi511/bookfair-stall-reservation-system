@@ -76,8 +76,8 @@ const AppRoutes = () => {
             <Route
               path="/employee"
               element={
-                <RequireAuth>
-                  <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/login">
+                <RequireAuth redirectTo="/">
+                  <RequireRole roles={["EMPLOYEE", "ROLE_EMPLOYEE"]} redirectTo="/">
                     <Outlet />
                   </RequireRole>
                 </RequireAuth>

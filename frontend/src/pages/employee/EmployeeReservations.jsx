@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { ChevronDown } from "lucide-react";
 import { getReservations } from "../../api/reservations.api";
 import { getEvents } from "../../api/events.api";
 import { getGenres } from "../../api/genres.api";
@@ -146,33 +147,39 @@ export default function EmployeeReservations() {
             <label className="block text-sm font-medium text-gray-700">
               Filter by Event
             </label>
-            <select
-              value={filterEventId}
-              onChange={(e) => setFilterEventId(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border rounded-xl"
-            >
-              <option value="">All Events</option>
-              {events.map((event) => (
-                <option key={event.id} value={event.id}>
-                  {event.name} ({event.year})
-                </option>
-              ))}
-            </select>
+            <div className="relative mt-1">
+              <select
+                value={filterEventId}
+                onChange={(e) => setFilterEventId(e.target.value)}
+                className="w-full px-3 py-2 pr-10 border appearance-none rounded-xl"
+              >
+                <option value="">All Events</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.name} ({event.year})
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute w-4 h-4 text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2" />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Filter by Status
             </label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-3 py-2 mt-1 border rounded-xl"
-            >
-              <option value="">All Statuses</option>
-              <option value="PENDING">PENDING</option>
-              <option value="CONFIRMED">CONFIRMED</option>
-              <option value="CANCELLED">CANCELLED</option>
-            </select>
+            <div className="relative mt-1">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full px-3 py-2 pr-10 border appearance-none rounded-xl"
+              >
+                <option value="">All Statuses</option>
+                <option value="PENDING">PENDING</option>
+                <option value="CONFIRMED">CONFIRMED</option>
+                <option value="CANCELLED">CANCELLED</option>
+              </select>
+              <ChevronDown className="absolute w-4 h-4 text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2" />
+            </div>
           </div>
         </div>
 

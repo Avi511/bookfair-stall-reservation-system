@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import StallMap from "../components/stalls/StallMap";
 import Loading from "../components/common/Loading";
@@ -18,7 +19,6 @@ export default function ReserveStalls() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
   const [activeEventId, setActiveEventId] = useState(null);
   const [activeEventInfo, setActiveEventInfo] = useState(null);
   const [nextEvents, setNextEvents] = useState([]);
@@ -39,7 +39,6 @@ export default function ReserveStalls() {
     async function run() {
       try {
         setLoading(true);
-        setError("");
 
         let resolvedEventId = eventId;
 
@@ -73,7 +72,7 @@ export default function ReserveStalls() {
         const msg = text.includes("active")
           ? "No active event is available right now."
           : "Unable to load the stall map. Please try again.";
-        setError(msg);
+        toast.error(msg);
       } finally {
         if (alive) setLoading(false);
       }
@@ -205,33 +204,29 @@ export default function ReserveStalls() {
 
   // Toggle selection (max 3)
   function onToggleSelect(stallId) {
-    setError("");
+    const exists = selected.includes(stallId);
+    if (exists) {
+      setSelected((prev) => prev.filter((x) => x !== stallId));
+      return;
+    }
 
-    setSelected((prev) => {
-      const exists = prev.includes(stallId);
+    if (remainingSelectable <= 0) {
+      toast.error("You already reserved the maximum 3 stalls.");
+      return;
+    }
 
-      if (exists) return prev.filter((x) => x !== stallId);
+    if (selected.length >= remainingSelectable) {
+      toast.error(`You can select only ${remainingSelectable} more stall(s).`);
+      return;
+    }
 
-      if (remainingSelectable <= 0) {
-        setError("You already reserved the maximum 3 stalls.");
-        return prev;
-      }
-
-      if (prev.length >= remainingSelectable) {
-        setError(`You can select only ${remainingSelectable} more stall(s).`);
-        return prev;
-      }
-
-      return [...prev, stallId];
-    });
+    setSelected((prev) => [...prev, stallId]);
   }
 
   // Confirm reservation
   async function onConfirm() {
-    setError("");
-
     if (selected.length < 1) {
-      setError("Select at least 1 stall.");
+      toast.error("Select at least 1 stall.");
       return;
     }
 
@@ -250,32 +245,19 @@ export default function ReserveStalls() {
 
       if (!newId) {
         // If backend doesn’t return the id, still redirect to /me
+        toast.success("Reservation confirmed successfully.");
         navigate("/me", { replace: true });
         return;
       }
 
       // ✅ Redirect to genres page
+      toast.success("Reservation confirmed successfully.");
       navigate(`/genres?reservationId=${newId}`, { replace: true });
     } catch (e) {
-      const raw =
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
-        e?.message ||
-        "Failed to create reservation.";
-      const text = String(raw || "").toLowerCase();
-      const msg =
-        text.includes("max") || text.includes("1 to 3") || text.includes("reserve 1 to 3")
-          ? "You already reached the maximum 3 stalls for this event."
-          : text.includes("event") && text.includes("not active")
-            ? "This event is not active for reservations."
-            : text.includes("event") && text.includes("end date")
-              ? "This event has ended, so reservations are closed."
-              : text.includes("invalid") && text.includes("stall")
-                ? "One or more selected stalls are invalid. Please refresh and try again."
-                : text.includes("already") || text.includes("taken")
-                  ? "Some selected stalls are no longer available. Please choose different stalls."
-                  : "Unable to confirm reservation right now. Please try again.";
-      setError(msg);
+      // API errors are shown globally by axios interceptor toast handling.
+      if (!e?.response) {
+        toast.error("Unable to confirm reservation right now. Please try again.");
+      }
     } finally {
       setSaving(false);
     }
@@ -311,12 +293,6 @@ export default function ReserveStalls() {
           Back
         </button>
       </div>
-
-      {error && (
-        <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
-          {error}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
         <div className="p-4 border rounded-2xl bg-white">

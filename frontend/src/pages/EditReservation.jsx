@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import StallMap from "../components/stalls/StallMap";
 import Loading from "../components/common/Loading";
@@ -155,6 +156,7 @@ export default function EditReservation() {
       await updateReservation(id, { stallIds: selected });
 
       // success
+      toast.success("Reservation updated successfully.");
       navigate("/me", { replace: true });
     } catch (e) {
       const msg =

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import axios from "../api/axiosInstance";
 
 export default function Register() {
@@ -30,6 +31,7 @@ export default function Register() {
         businessName,
       });
 
+      toast.success("Account created successfully. Please login.");
       navigate("/login", { replace: true });
     } catch (err) {
       const msg =

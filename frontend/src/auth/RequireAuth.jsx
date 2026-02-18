@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
-const RequireAuth = ({ children }) => {
+const RequireAuth = ({ children, redirectTo = "/login" }) => {
 	const { isAuthenticated, isInitializing } = useAuth();
 	const location = useLocation();
 
@@ -11,7 +11,7 @@ const RequireAuth = ({ children }) => {
 	}
 
 	if (!isAuthenticated) {
-		return <Navigate to="/login" replace state={{ from: location }} />;
+		return <Navigate to={redirectTo} replace state={{ from: location }} />;
 	}
 
 	return children;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import axios from "../api/axiosInstance";
@@ -13,16 +13,20 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const params = new URLSearchParams(location.search);
   const sessionExpired = params.get('sessionExpired');
 
   const redirectTo = location.state?.from?.pathname;
 
+  useEffect(() => {
+    if (sessionExpired) {
+      toast.error("Your session has expired. Please log in again.");
+    }
+  }, [sessionExpired]);
+
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
@@ -34,6 +38,10 @@ export default function Login() {
       login(token);
 
       const payload = decodeJwt(token);
+      const role = String(
+        payload?.role || payload?.roles?.[0] || "",
+      ).toUpperCase();
+      const isEmployee = role === "EMPLOYEE" || role === "ROLE_EMPLOYEE";
       let userName = payload?.businessName || payload?.name || payload?.sub;
       try {
         const meRes = await axios.get("/auth/me");
@@ -50,14 +58,9 @@ export default function Login() {
         return;
       }
 
-      navigate("/", { replace: true });
-    } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Login failed";
-      setError(msg);
+      navigate(isEmployee ? "/employee/dashboard" : "/", { replace: true });
+    } catch {
+      // API errors are shown globally by axios interceptor toast handling.
     } finally {
       setLoading(false);
     }
@@ -67,21 +70,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
       <div className="w-full max-w-md p-6 bg-white shadow rounded-2xl">
         <h1 className="text-2xl font-bold text-[var(--color-dark)]">Login</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Employee and Business users can login here.
-        </p>
-
-        {error && (
-          <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
-            {error}
-          </div>
-        )}
-
-        {sessionExpired && (
-          <div className="px-4 py-3 mt-4 text-sm text-yellow-800 rounded-xl bg-yellow-50">
-            Your session has expired. Please log in again.
-          </div>
-        )}
+       
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>

@@ -19,6 +19,15 @@ export const register = async ({ email, password, businessName }) => {
 };
 
 /**
+ * Register employee (Employee only)
+ * body: { email, password }
+ */
+export const registerEmployee = async ({ email, password }) => {
+  const res = await api.post("/employees", { email, password });
+  return res.data;
+};
+
+/**
  * Optional: get current user profile (if backend supports)
  */
 export const getMe = async () => {
