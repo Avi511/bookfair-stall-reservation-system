@@ -104,6 +104,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/reservations")
                         .hasRole(Role.EMPLOYEE.name())
 
+                        .requestMatchers(HttpMethod.PUT,"/api/reservations/employee/*")
+                        .hasRole(Role.EMPLOYEE.name())
+
                         .requestMatchers("/api/employees/**")
                         .hasRole(Role.EMPLOYEE.name())
 

@@ -67,6 +67,16 @@ public class ReservationController {
         return ResponseEntity.ok(reservationDto);
     }
 
+    @PutMapping("/employee/{id}")
+    public ResponseEntity<?> cancelReservationByEmployee(
+            @PathVariable(name = "id") Long reservationId
+    ) {
+        var reservationDto = reservationService.cancelReservation(
+                reservationId
+        );
+        return ResponseEntity.ok(reservationDto);
+    }
+
     @PutMapping("/{id}/genres")
     public ResponseEntity<?> addGenres(
             @PathVariable(name = "id") Long reservationId,
