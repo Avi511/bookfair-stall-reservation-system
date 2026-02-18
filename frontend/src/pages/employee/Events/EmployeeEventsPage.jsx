@@ -1,11 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import Alert from "../../../components/common/Alert";
 import {
   createEvent,
   endEvent,
   getEvents,
   setActiveEvent,
+  setInactiveEvent,
   updateEvent,
 } from "../../../api/events.api";
 
@@ -32,7 +34,6 @@ export default function EmployeeEventsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [msg, setMsg] = useState("");
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
 
@@ -66,7 +67,6 @@ export default function EmployeeEventsPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setMsg("");
 
     if (!form.name.trim()) {
       setError("Event name is required.");
@@ -98,10 +98,10 @@ export default function EmployeeEventsPage() {
           startDate: payload.startDate,
           endDate: payload.endDate,
         });
-        setMsg("Event updated.");
+        toast.success("Event updated.");
       } else {
         await createEvent(payload);
-        setMsg("Event created.");
+        toast.success("Event created.");
       }
 
       resetForm();
@@ -116,7 +116,6 @@ export default function EmployeeEventsPage() {
   const beginEdit = (event) => {
     setEditingId(event.id);
     setError("");
-    setMsg("");
     setForm({
       name: event.name || "",
       year: event.year || new Date().getFullYear(),
@@ -128,7 +127,6 @@ export default function EmployeeEventsPage() {
 
   const activate = async (event) => {
     setError("");
-    setMsg("");
 
     // UI enforcement for single active event.
     if (activeEvent && activeEvent.id !== event.id) {
@@ -141,7 +139,7 @@ export default function EmployeeEventsPage() {
     setSaving(true);
     try {
       await setActiveEvent(event.id);
-      setMsg(`Activated "${event.name}".`);
+      toast.success(`Activated "${event.name}".`);
       await loadEvents();
     } catch (e) {
       setError(extractApiError(e, "Failed to activate event."));
@@ -150,13 +148,26 @@ export default function EmployeeEventsPage() {
     }
   };
 
+  const deactivate = async (event) => {
+    setError("");
+    setSaving(true);
+    try {
+      await setInactiveEvent(event.id);
+      toast.success(`"${event.name}" is now inactive.`);
+      await loadEvents();
+    } catch (e) {
+      setError(extractApiError(e, "Failed to set event inactive."));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const end = async (event) => {
     setError("");
-    setMsg("");
     setSaving(true);
     try {
       await endEvent(event.id);
-      setMsg(`Ended "${event.name}".`);
+      toast.success(`Ended "${event.name}".`);
       await loadEvents();
     } catch (e) {
       setError(extractApiError(e, "Failed to end event."));
@@ -170,12 +181,6 @@ export default function EmployeeEventsPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-wrap items-center gap-3 mb-4">
           <Link
-            to="/employee/dashboard"
-            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
-          >
-            Dashboard
-          </Link>
-          <Link
             to="/employee/stalls"
             className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
           >
@@ -187,23 +192,11 @@ export default function EmployeeEventsPage() {
           >
             Events
           </Link>
-          <Link
-            to="/employee/reservations"
-            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
-          >
-            Reservations
-          </Link>
-          <Link
-            to="/employee/genres"
-            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
-          >
-            Genres
-          </Link>
         </div>
 
         <h1 className="text-2xl font-bold text-[var(--color-dark)]">Employee Event Management</h1>
         <p className="mt-1 text-sm text-gray-600">
-          Create, edit, activate, and end events. Only one event can be active at a time.
+          Create, edit, activate, and inactivate events. Only one event can be active at a time.
         </p>
 
         {activeEvent && (
@@ -213,7 +206,6 @@ export default function EmployeeEventsPage() {
         )}
 
         {error && <Alert type="error">{error}</Alert>}
-        {msg && <Alert type="success">{msg}</Alert>}
 
         <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
           <div className="lg:col-span-1">
@@ -308,7 +300,8 @@ export default function EmployeeEventsPage() {
                     const status = String(event.status || "").toUpperCase();
                     const canActivate =
                       status !== "ACTIVE" && status !== "ENDED" && (!activeEvent || activeEvent.id === event.id);
-                    const canEnd = status === "ACTIVE";
+                    const canDeactivate = status === "ACTIVE";
+                    const canEnd = status === "ACTIVE" || status === "INACTIVE";
 
                     return (
                       <div key={event.id} className="p-4">
@@ -338,6 +331,14 @@ export default function EmployeeEventsPage() {
                               className="px-3 py-1.5 text-sm text-white rounded-lg bg-blue-600 disabled:opacity-60"
                             >
                               Activate
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deactivate(event)}
+                              disabled={saving || !canDeactivate}
+                              className="px-3 py-1.5 text-sm text-white rounded-lg bg-amber-600 disabled:opacity-60"
+                            >
+                              Inactive
                             </button>
                             <button
                               type="button"

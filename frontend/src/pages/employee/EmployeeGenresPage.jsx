@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import Alert from "../../components/common/Alert";
 import Loading from "../../components/common/Loading";
 import {
@@ -17,7 +18,6 @@ export default function EmployeeGenresPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [msg, setMsg] = useState("");
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState(null);
 
@@ -50,7 +50,6 @@ export default function EmployeeGenresPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setMsg("");
 
     const trimmed = name.trim();
     if (!trimmed) {
@@ -62,10 +61,10 @@ export default function EmployeeGenresPage() {
     try {
       if (editingId) {
         await updateGenre({ id: editingId, name: trimmed });
-        setMsg("Genre updated.");
+        toast.success("Genre updated.");
       } else {
         await createGenre({ name: trimmed });
-        setMsg("Genre created.");
+        toast.success("Genre created.");
       }
       resetForm();
       await loadGenres();
@@ -80,7 +79,6 @@ export default function EmployeeGenresPage() {
     setEditingId(genre?.id || null);
     setName(genre?.name || "");
     setError("");
-    setMsg("");
   };
 
   const removeGenre = async (genre) => {
@@ -91,12 +89,11 @@ export default function EmployeeGenresPage() {
     if (!ok) return;
 
     setError("");
-    setMsg("");
     setSaving(true);
     try {
       await deleteGenre(genreId);
       if (editingId === genreId) resetForm();
-      setMsg("Genre deleted.");
+      toast.success("Genre deleted.");
       await loadGenres();
     } catch (e) {
       setError(extractApiError(e, "Failed to delete genre."));
@@ -151,7 +148,6 @@ export default function EmployeeGenresPage() {
         </p>
 
         {error && <Alert type="error">{error}</Alert>}
-        {msg && <Alert type="success">{msg}</Alert>}
 
         <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
           <div className="lg:col-span-1">

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { getEvents } from "../../api/events.api";
 import { getReservations } from "../../api/reservations.api";
+import { registerEmployee } from "../../api/auth.api";
 import Loading from "../../components/common/Loading";
 
 const extractApiError = (e, fallback) =>
@@ -15,6 +17,10 @@ export default function EmployeeDashboard() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [employeeEmail, setEmployeeEmail] = useState("");
+  const [employeePassword, setEmployeePassword] = useState("");
+  const [employeeConfirmPassword, setEmployeeConfirmPassword] = useState("");
+  const [creatingEmployee, setCreatingEmployee] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -73,6 +79,46 @@ export default function EmployeeDashboard() {
     };
   }, [activeEvent, reservations]);
 
+  const handleCreateEmployee = async (e) => {
+    e.preventDefault();
+
+    const email = employeeEmail.trim().toLowerCase();
+    const password = employeePassword.trim();
+    const confirmPassword = employeeConfirmPassword.trim();
+
+    if (!email) {
+      toast.error("Employee email is required.");
+      return;
+    }
+    if (!password) {
+      toast.error("Employee password is required.");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setCreatingEmployee(true);
+      await registerEmployee({ email, password });
+      toast.success("Employee account created successfully.");
+      setEmployeeEmail("");
+      setEmployeePassword("");
+      setEmployeeConfirmPassword("");
+    } catch (e2) {
+      if (!e2?.response) {
+        toast.error("Failed to create employee. Please try again.");
+      }
+    } finally {
+      setCreatingEmployee(false);
+    }
+  };
+
   if (loading) {
     return <Loading text="Loading dashboard..." />;
   }
@@ -105,12 +151,6 @@ export default function EmployeeDashboard() {
           >
             Reservations
           </Link>
-          <Link
-            to="/employee/genres"
-            className="px-3 py-1.5 text-sm font-semibold border rounded-lg hover:bg-gray-50"
-          >
-            Genres
-          </Link>
         </div>
 
         <h1 className="text-2xl font-bold text-[var(--color-dark)]">
@@ -126,10 +166,9 @@ export default function EmployeeDashboard() {
           </div>
         )}
 
-        {/* Active Event Section */}
         <div className="mt-6">
           {activeEvent ? (
-            <div className="p-4 border rounded-2xl bg-blue-50 border-blue-200">
+            <div className="p-4 border border-blue-200 rounded-2xl bg-blue-50">
               <h2 className="text-lg font-semibold text-blue-900">
                 Active Event
               </h2>
@@ -145,7 +184,7 @@ export default function EmployeeDashboard() {
               </div>
             </div>
           ) : (
-            <div className="p-4 border rounded-2xl bg-yellow-50 border-yellow-200">
+            <div className="p-4 border border-yellow-200 rounded-2xl bg-yellow-50">
               <h2 className="text-lg font-semibold text-yellow-900">
                 No Active Event
               </h2>
@@ -157,7 +196,6 @@ export default function EmployeeDashboard() {
           )}
         </div>
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2 lg:grid-cols-2">
           <div className="p-6 bg-white border rounded-2xl">
             <div className="flex items-center justify-between">
@@ -169,7 +207,7 @@ export default function EmployeeDashboard() {
                   {metrics.totalReservations}
                 </p>
               </div>
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl">
                 <svg
                   className="w-6 h-6 text-blue-600"
                   fill="none"
@@ -222,18 +260,17 @@ export default function EmployeeDashboard() {
           </div>
         </div>
 
-        {/* Quick Navigation */}
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-[var(--color-dark)]">
             Quick Navigation
           </h2>
-          <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
             <Link
               to="/employee/events"
               className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
             >
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-100">
+                <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-lg">
                   <svg
                     className="w-5 h-5 text-purple-600"
                     fill="none"
@@ -262,7 +299,7 @@ export default function EmployeeDashboard() {
               className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
             >
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-100">
+                <div className="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-lg">
                   <svg
                     className="w-5 h-5 text-orange-600"
                     fill="none"
@@ -314,36 +351,64 @@ export default function EmployeeDashboard() {
                 </div>
               </div>
             </Link>
-
-            <Link
-              to="/employee/genres"
-              className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100">
-                  <svg
-                    className="w-5 h-5 text-emerald-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 8h10M7 12h6m-6 4h10M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-semibold text-[var(--color-dark)]">
-                    Genres
-                  </p>
-                  <p className="text-xs text-gray-500">Manage genre catalog</p>
-                </div>
-              </div>
-            </Link>
           </div>
+        </div>
+
+        <div className="p-6 mt-8 bg-white border rounded-2xl">
+          <h2 className="text-lg font-semibold text-[var(--color-dark)]">
+            Add Employee
+          </h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Create a new employee account for staff access.
+          </p>
+
+          <form onSubmit={handleCreateEmployee} className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
+            <div>
+              <label className="text-sm text-gray-700">Employee Email</label>
+              <input
+                type="email"
+                value={employeeEmail}
+                onChange={(e) => setEmployeeEmail(e.target.value)}
+                placeholder="staff@example.com"
+                className="w-full px-3 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-700">Password</label>
+              <input
+                type="password"
+                value={employeePassword}
+                onChange={(e) => setEmployeePassword(e.target.value)}
+                placeholder="At least 6 characters"
+                className="w-full px-3 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-700">Confirm Password</label>
+              <input
+                type="password"
+                value={employeeConfirmPassword}
+                onChange={(e) => setEmployeeConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+                className="w-full px-3 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                required
+              />
+            </div>
+
+            <div className="md:col-span-3">
+              <button
+                type="submit"
+                disabled={creatingEmployee}
+                className="px-5 py-2.5 font-semibold text-white rounded-xl bg-[var(--color-primary)] hover:opacity-95 disabled:opacity-60"
+              >
+                {creatingEmployee ? "Creating Employee..." : "Create Employee"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
