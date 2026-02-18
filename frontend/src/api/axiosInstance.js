@@ -1,5 +1,6 @@
 // src/api/axiosClient.js
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL || "https://bookfair-stall-reservation-system-production.up.railway.app/api";
@@ -44,6 +45,26 @@ axiosClient.interceptors.request.use(
 // =============================
 let isRefreshing = false;
 let failedQueue = [];
+let lastErrorToast = { message: "", at: 0 };
+
+const getErrorMessage = (error) =>
+  error?.response?.data?.message ||
+  error?.response?.data?.error ||
+  error?.message ||
+  "Something went wrong.";
+
+const showErrorToast = (message) => {
+  const text = String(message || "").trim();
+  if (!text) return;
+
+  const now = Date.now();
+  if (lastErrorToast.message === text && now - lastErrorToast.at < 1200) {
+    return;
+  }
+
+  lastErrorToast = { message: text, at: now };
+  toast.error(text);
+};
 
 // resolve all queued requests after refresh
 const processQueue = (error, token = null) => {
@@ -62,9 +83,14 @@ axiosClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const url = String(originalRequest?.url || "");
+    const isAuthRoute =
+      url.includes("/auth/login") ||
+      url.includes("/auth/register") ||
+      url.includes("/auth/refresh");
 
     // if unauthorized and not already retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       if (isRefreshing) {
         // queue request while refreshing
         return new Promise((resolve, reject) => {
@@ -107,6 +133,7 @@ axiosClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         clearAccessToken();
+        showErrorToast("Your session has expired. Please log in again.");
 
         // dispatch logout event so contexts can clear user state
         try {
@@ -115,8 +142,8 @@ axiosClient.interceptors.response.use(
           // ignore
         }
 
-        // Redirect to login with session expired flag
-        window.location.href = "/login?sessionExpired=1";
+        // Redirect to home after session expiry
+        window.location.href = "/";
 
         return Promise.reject(refreshError);
       } finally {
@@ -148,13 +175,20 @@ axiosClient.interceptors.response.use(
       // ignore mapping errors
     }
 
-    // If we receive a plain 401 (not refresh flow), ensure token cleared and redirect
+    // If we receive a plain 401 (not refresh flow), ensure token cleared and redirect.
+    // Skip redirect when there is no token (e.g. user already logged out).
     if (error.response?.status === 401) {
+      const hadToken = Boolean(getAccessToken());
+      showErrorToast(getErrorMessage(error));
       clearAccessToken();
       try { window.dispatchEvent(new Event("app:logout")); } catch (e) {}
-      window.location.href = "/login?sessionExpired=1";
+      if (hadToken) {
+        window.location.href = "/";
+      }
+      return Promise.reject(error);
     }
 
+    showErrorToast(getErrorMessage(error));
     return Promise.reject(error);
   },
 );

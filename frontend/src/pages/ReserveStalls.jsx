@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import StallMap from "../components/stalls/StallMap";
 import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
 
 import { getStallsByEvent } from "../api/stalls.api";
-import { createReservation } from "../api/reservations.api";
+import { createReservation, getMyReservations } from "../api/reservations.api";
 import { getActiveEvent, getEvents } from "../api/events.api";
 
 export default function ReserveStalls() {
@@ -18,10 +19,11 @@ export default function ReserveStalls() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
   const [activeEventId, setActiveEventId] = useState(null);
   const [activeEventInfo, setActiveEventInfo] = useState(null);
   const [nextEvents, setNextEvents] = useState([]);
+  const [existingReservedStallIds, setExistingReservedStallIds] = useState([]);
+  const [reservedLoadError, setReservedLoadError] = useState("");
 
   const formatDate = (value) => {
     if (!value) return "-";
@@ -30,14 +32,12 @@ export default function ReserveStalls() {
     return d.toLocaleDateString();
   };
 
-  // Fetch stalls for the event
   useEffect(() => {
     let alive = true;
 
     async function run() {
       try {
         setLoading(true);
-        setError("");
 
         let resolvedEventId = eventId;
 
@@ -71,7 +71,7 @@ export default function ReserveStalls() {
         const msg = text.includes("active")
           ? "No active event is available right now."
           : "Unable to load the stall map. Please try again.";
-        setError(msg);
+        toast.error(msg);
       } finally {
         if (alive) setLoading(false);
       }
@@ -119,7 +119,63 @@ export default function ReserveStalls() {
     };
   }, []);
 
-  // Determine which stalls are reserved (disabled)
+  useEffect(() => {
+    let alive = true;
+
+    async function loadMyReservedStalls() {
+      if (!activeEventId) return;
+
+      try {
+        setReservedLoadError("");
+        let data;
+        try {
+          data = await getMyReservations({ eventId: activeEventId });
+        } catch {
+          data = await getMyReservations();
+        }
+        if (!alive) return;
+
+        const reservations = Array.isArray(data) ? data : [];
+        const reserved = new Set();
+
+        reservations.forEach((reservation) => {
+          const reservationEventId = Number(reservation?.eventId);
+          if (reservationEventId && reservationEventId !== Number(activeEventId)) {
+            return;
+          }
+
+          const status = String(reservation?.status || "").toUpperCase();
+          if (status === "CANCELLED") return;
+
+          if (Array.isArray(reservation?.stallIds)) {
+            reservation.stallIds.forEach((id) => {
+              const numericId = Number(id);
+              if (numericId) reserved.add(numericId);
+            });
+          }
+
+          if (Array.isArray(reservation?.stalls)) {
+            reservation.stalls.forEach((stall) => {
+              const numericId = Number(stall?.id);
+              if (numericId) reserved.add(numericId);
+            });
+          }
+        });
+
+        setExistingReservedStallIds(Array.from(reserved));
+      } catch {
+        if (!alive) return;
+        setExistingReservedStallIds([]);
+        setReservedLoadError("Unable to load your existing reserved stalls right now.");
+      }
+    }
+
+    loadMyReservedStalls();
+    return () => {
+      alive = false;
+    };
+  }, [activeEventId]);
+
   const disabledStallIds = useMemo(() => {
     const disabled = [];
 
@@ -140,30 +196,33 @@ export default function ReserveStalls() {
     return new Map(stalls.map((s) => [s.id, s.stallCode || `Stall ${s.id}`]));
   }, [stalls]);
 
-  // Toggle selection (max 3)
+  const maxAllowedStalls = 3;
+  const alreadyReservedCount = existingReservedStallIds.length;
+  const remainingSelectable = Math.max(0, maxAllowedStalls - alreadyReservedCount);
+
   function onToggleSelect(stallId) {
-    setError("");
+    const exists = selected.includes(stallId);
+    if (exists) {
+      setSelected((prev) => prev.filter((x) => x !== stallId));
+      return;
+    }
 
-    setSelected((prev) => {
-      const exists = prev.includes(stallId);
+    if (remainingSelectable <= 0) {
+      toast.error("You already reserved the maximum 3 stalls.");
+      return;
+    }
 
-      if (exists) return prev.filter((x) => x !== stallId);
+    if (selected.length >= remainingSelectable) {
+      toast.error(`You can select only ${remainingSelectable} more stall(s).`);
+      return;
+    }
 
-      if (prev.length >= 3) {
-        setError("You can select maximum 3 stalls.");
-        return prev;
-      }
-
-      return [...prev, stallId];
-    });
+    setSelected((prev) => [...prev, stallId]);
   }
 
-  // Confirm reservation
   async function onConfirm() {
-    setError("");
-
     if (selected.length < 1) {
-      setError("Select at least 1 stall.");
+      toast.error("Select at least 1 stall.");
       return;
     }
 
@@ -175,31 +234,21 @@ export default function ReserveStalls() {
         stallIds: selected,
       });
 
-      // Try to extract reservation id from response
-      // supports: { id: 123 } OR { reservationId: 123 } OR { data: { id: 123 } }
       const newId =
         res?.id || res?.reservationId || res?.data?.id || res?.data?.reservationId;
 
       if (!newId) {
-        // If backend doesn’t return the id, still redirect to /me
+        toast.success("Reservation confirmed successfully.");
         navigate("/me", { replace: true });
         return;
       }
 
-      // ✅ Redirect to genres page
+      toast.success("Reservation confirmed successfully.");
       navigate(`/genres?reservationId=${newId}`, { replace: true });
     } catch (e) {
-      const raw =
-        e?.response?.data?.message ||
-        e?.response?.data?.error ||
-        e?.message ||
-        "Failed to create reservation.";
-      const text = String(raw || "").toLowerCase();
-      const msg =
-        text.includes("already") || text.includes("taken")
-          ? "Some selected stalls are no longer available. Please choose different stalls."
-          : "Unable to confirm reservation right now. Please try again.";
-      setError(msg);
+      if (!e?.response) {
+        toast.error("Unable to confirm reservation right now. Please try again.");
+      }
     } finally {
       setSaving(false);
     }
@@ -213,7 +262,7 @@ export default function ReserveStalls() {
         <EmptyState
           title="No active event or no stalls available"
           description="There are no stalls available for reservation at the moment. Please check back later or contact event organizers."
-          action={<button onClick={() => navigate(-1)} className="px-4 py-2 mt-4 rounded-xl border">Go Back</button>}
+          action={<button onClick={() => navigate(-1)} className="px-4 py-2 mt-4 border rounded-xl">Go Back</button>}
         />
       </div>
     );
@@ -236,14 +285,8 @@ export default function ReserveStalls() {
         </button>
       </div>
 
-      {error && (
-        <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
-          {error}
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
-        <div className="p-4 border rounded-2xl bg-white">
+        <div className="p-4 bg-white border rounded-2xl">
           <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
             Current Active Event
           </p>
@@ -261,7 +304,7 @@ export default function ReserveStalls() {
           )}
         </div>
 
-        <div className="p-4 border rounded-2xl bg-white">
+        <div className="p-4 bg-white border rounded-2xl">
           <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
             Next Events
           </p>
@@ -290,7 +333,7 @@ export default function ReserveStalls() {
             stalls={stalls}
             selectedStallIds={selected}
             disabledStallIds={disabledStallIds}
-            highlightStallIds={[]} // none in reserve page
+            highlightStallIds={[]}
             onToggleSelect={onToggleSelect}
           />
         </div>
@@ -302,8 +345,36 @@ export default function ReserveStalls() {
             </h2>
 
             <p className="mt-1 text-sm text-gray-600">
-              Selected: <span className="font-semibold">{selected.length}</span> / 3
+              Selected: <span className="font-semibold">{selected.length}</span> / {remainingSelectable}
             </p>
+            <p className="mt-1 text-sm text-gray-600">
+              Already Reserved: <span className="font-semibold">{alreadyReservedCount}</span> / {maxAllowedStalls}
+            </p>
+            {reservedLoadError && (
+              <p className="mt-1 text-xs text-amber-700">
+                {reservedLoadError}
+              </p>
+            )}
+
+            <div className="mt-3">
+              <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
+                Your Reserved Stalls
+              </p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {existingReservedStallIds.length === 0 ? (
+                  <span className="text-sm text-gray-500">No reserved stalls yet</span>
+                ) : (
+                  existingReservedStallIds.map((sid) => (
+                    <span
+                      key={`reserved-${sid}`}
+                      className="px-3 py-1 text-sm border rounded-full bg-emerald-50 text-emerald-700 border-emerald-200"
+                    >
+                      {stallCodeById.get(sid) || `Stall ${sid}`}
+                    </span>
+                  ))
+                )}
+              </div>
+            </div>
 
             <div className="flex flex-wrap gap-2 mt-3">
               {selected.length === 0 ? (
@@ -322,14 +393,14 @@ export default function ReserveStalls() {
 
             <button
               onClick={onConfirm}
-              disabled={saving}
+              disabled={saving || selected.length === 0 || remainingSelectable <= 0}
               className="mt-5 w-full rounded-xl bg-[var(--color-primary)] text-white py-2.5 font-semibold hover:opacity-95 disabled:opacity-60"
             >
               {saving ? "Confirming..." : "Confirm Reservation"}
             </button>
 
             <p className="mt-3 text-xs text-gray-500">
-              Reserved stalls (grey) cannot be selected. You can reserve up to 3 stalls.
+              Reserved stalls (grey) cannot be selected. You can reserve up to 3 stalls in total.
             </p>
           </div>
         </div>

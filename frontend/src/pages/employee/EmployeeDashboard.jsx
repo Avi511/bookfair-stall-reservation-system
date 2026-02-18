@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { getEvents } from "../../api/events.api";
 import { getReservations } from "../../api/reservations.api";
+import { registerEmployee } from "../../api/auth.api";
 import Loading from "../../components/common/Loading";
 
 const extractApiError = (e, fallback) =>
@@ -15,6 +17,10 @@ export default function EmployeeDashboard() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [employeeEmail, setEmployeeEmail] = useState("");
+  const [employeePassword, setEmployeePassword] = useState("");
+  const [employeeConfirmPassword, setEmployeeConfirmPassword] = useState("");
+  const [creatingEmployee, setCreatingEmployee] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -72,6 +78,47 @@ export default function EmployeeDashboard() {
       totalReservedStalls: reservedStallsSet.size,
     };
   }, [activeEvent, reservations]);
+
+  const handleCreateEmployee = async (e) => {
+    e.preventDefault();
+
+    const email = employeeEmail.trim().toLowerCase();
+    const password = employeePassword.trim();
+    const confirmPassword = employeeConfirmPassword.trim();
+
+    if (!email) {
+      toast.error("Employee email is required.");
+      return;
+    }
+    if (!password) {
+      toast.error("Employee password is required.");
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setCreatingEmployee(true);
+      await registerEmployee({ email, password });
+      toast.success("Employee account created successfully.");
+      setEmployeeEmail("");
+      setEmployeePassword("");
+      setEmployeeConfirmPassword("");
+    } catch (e2) {
+      // API errors are shown globally by axios interceptor toast handling.
+      if (!e2?.response) {
+        toast.error("Failed to create employee. Please try again.");
+      }
+    } finally {
+      setCreatingEmployee(false);
+    }
+  };
 
   if (loading) {
     return <Loading text="Loading dashboard..." />;
@@ -309,6 +356,63 @@ export default function EmployeeDashboard() {
               </div>
             </Link>
           </div>
+        </div>
+
+        <div className="p-6 mt-8 bg-white border rounded-2xl">
+          <h2 className="text-lg font-semibold text-[var(--color-dark)]">
+            Add Employee
+          </h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Create a new employee account for staff access.
+          </p>
+
+          <form onSubmit={handleCreateEmployee} className="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
+            <div>
+              <label className="text-sm text-gray-700">Employee Email</label>
+              <input
+                type="email"
+                value={employeeEmail}
+                onChange={(e) => setEmployeeEmail(e.target.value)}
+                placeholder="staff@example.com"
+                className="w-full px-3 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-700">Password</label>
+              <input
+                type="password"
+                value={employeePassword}
+                onChange={(e) => setEmployeePassword(e.target.value)}
+                placeholder="At least 6 characters"
+                className="w-full px-3 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-700">Confirm Password</label>
+              <input
+                type="password"
+                value={employeeConfirmPassword}
+                onChange={(e) => setEmployeeConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+                className="w-full px-3 py-2 mt-1 border rounded-xl outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
+                required
+              />
+            </div>
+
+            <div className="md:col-span-3">
+              <button
+                type="submit"
+                disabled={creatingEmployee}
+                className="px-5 py-2.5 font-semibold text-white rounded-xl bg-[var(--color-primary)] hover:opacity-95 disabled:opacity-60"
+              >
+                {creatingEmployee ? "Creating Employee..." : "Create Employee"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -8,6 +8,20 @@ export const getGenres = async () => {
   return res.data;
 };
 
+export const createGenre = async ({ name }) => {
+  const res = await api.post("/genres", { name });
+  return res.data;
+};
+
+export const updateGenre = async ({ id, name }) => {
+  const res = await api.put(`/genres/${id}`, { name });
+  return res.data;
+};
+
+export const deleteGenre = async (id) => {
+  await api.delete(`/genres/${id}`);
+};
+
 /**
  * Get selected genres for a reservation
  */

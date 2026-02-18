@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import Loading from "../components/common/Loading";
 import {
@@ -17,7 +18,6 @@ export default function Genres() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const loadGenres = async () => {
     if (!reservationId) return;
@@ -25,7 +25,6 @@ export default function Genres() {
     try {
       setLoading(true);
       setError("");
-      setSuccess("");
 
       const [allGenres, reservationGenres] = await Promise.all([
         getGenres(),
@@ -69,13 +68,12 @@ export default function Genres() {
     try {
       setSaving(true);
       setError("");
-      setSuccess("");
 
       await updateReservationGenres({
         reservationId: Number(reservationId),
         genreIds: selectedGenreIds,
       });
-      setSuccess("Genres updated successfully.");
+      toast.success("Genres updated successfully.");
     } catch (e) {
       const msg =
         e?.response?.data?.message ||
@@ -113,11 +111,6 @@ export default function Genres() {
       {error && (
         <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="px-4 py-3 mt-4 text-sm rounded-xl text-emerald-700 bg-emerald-50">
-          {success}
         </div>
       )}
 

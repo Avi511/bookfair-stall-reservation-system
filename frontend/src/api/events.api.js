@@ -48,6 +48,14 @@ export const setActiveEvent = async (eventId) => {
 };
 
 /**
+ * Set event inactive (employee)
+ */
+export const setInactiveEvent = async (eventId) => {
+  const res = await api.patch(`/events/${eventId}/status`, { status: "INACTIVE" });
+  return res.data;
+};
+
+/**
  * End event (employee)
  */
 export const endEvent = async (eventId) => {

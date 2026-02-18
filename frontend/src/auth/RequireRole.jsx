@@ -7,7 +7,7 @@ export default function RequireRole({ children, roles = [], redirectTo = "/login
   const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+    return <Navigate to={redirectTo} replace state={{ from: location }} />;
   }
 
   const userRole = String(user?.role || "").toUpperCase();
