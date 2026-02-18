@@ -1,33 +1,19 @@
-// src/api/axiosClient.js
 import axios from "axios";
 import toast from "react-hot-toast";
 
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL || "https://bookfair-stall-reservation-system-production.up.railway.app/api";
 const ACCESS_TOKEN_KEY = "accessToken";
-
-// =============================
-// Token helpers
-// =============================
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 
 export const setAccessToken = (token) =>
   localStorage.setItem(ACCESS_TOKEN_KEY, token);
 
 export const clearAccessToken = () => localStorage.removeItem(ACCESS_TOKEN_KEY);
-
-// =============================
-// Axios instance
-// =============================
 const axiosClient = axios.create({
   baseURL: API_BASE,
-  withCredentials: true, // IMPORTANT (refresh cookie)
+  withCredentials: true,
 });
-
-// =============================
-// Request Interceptor
-// Automatically attach access token
-// =============================
 axiosClient.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
@@ -38,11 +24,6 @@ axiosClient.interceptors.request.use(
   },
   (error) => Promise.reject(error),
 );
-
-// =============================
-// Response Interceptor
-// Handle 401 + refresh logic
-// =============================
 let isRefreshing = false;
 let failedQueue = [];
 let lastErrorToast = { message: "", at: 0 };
@@ -65,8 +46,6 @@ const showErrorToast = (message) => {
   lastErrorToast = { message: text, at: now };
   toast.error(text);
 };
-
-// resolve all queued requests after refresh
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
     if (error) {
@@ -88,11 +67,8 @@ axiosClient.interceptors.response.use(
       url.includes("/auth/login") ||
       url.includes("/auth/register") ||
       url.includes("/auth/refresh");
-
-    // if unauthorized and not already retried
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
       if (isRefreshing) {
-        // queue request while refreshing
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -107,7 +83,6 @@ axiosClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        // call refresh endpoint
         const res = await axios.post(
           `${API_BASE}/auth/refresh`,
           {},
@@ -121,28 +96,19 @@ axiosClient.interceptors.response.use(
         }
 
         setAccessToken(newToken);
-
-        // update default header
         axiosClient.defaults.headers.Authorization = `Bearer ${newToken}`;
 
         processQueue(null, newToken);
-
-        // retry original request
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return axiosClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
         clearAccessToken();
         showErrorToast("Your session has expired. Please log in again.");
-
-        // dispatch logout event so contexts can clear user state
         try {
           window.dispatchEvent(new Event("app:logout"));
         } catch (e) {
-          // ignore
         }
-
-        // Redirect to home after session expiry
         window.location.href = "/";
 
         return Promise.reject(refreshError);
@@ -150,8 +116,6 @@ axiosClient.interceptors.response.use(
         isRefreshing = false;
       }
     }
-
-    // Map some backend messages to friendlier messages for UI
     try {
       const resp = error.response;
       if (resp && resp.data) {
@@ -172,11 +136,7 @@ axiosClient.interceptors.response.use(
         }
       }
     } catch (e) {
-      // ignore mapping errors
     }
-
-    // If we receive a plain 401 (not refresh flow), ensure token cleared and redirect.
-    // Skip redirect when there is no token (e.g. user already logged out).
     if (error.response?.status === 401) {
       const hadToken = Boolean(getAccessToken());
       showErrorToast(getErrorMessage(error));
@@ -194,3 +154,4 @@ axiosClient.interceptors.response.use(
 );
 
 export default axiosClient;
+
