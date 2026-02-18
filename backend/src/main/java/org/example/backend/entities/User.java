@@ -34,6 +34,10 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "email_verified", nullable = false)
+    private boolean emailVerified = false;
+
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
