@@ -20,13 +20,21 @@ const Navbar = () => {
 
   const role = String(user?.role || "").toUpperCase();
   const isEmployee = role === "EMPLOYEE" || role === "ROLE_EMPLOYEE";
-  const showPrimaryAction = !isAuthenticated || !isEmployee;
-  const actionPath = !isAuthenticated ? "/login" : "/reserve-stalls";
-  const actionLabel = !isAuthenticated ? "Login" : "Reserve Stall";
+  const showPrimaryAction = true;
+  const actionPath = !isAuthenticated
+    ? "/login"
+    : isEmployee
+      ? "/employee/stalls"
+      : "/reserve-stalls";
+  const actionLabel = !isAuthenticated
+    ? "Login"
+    : isEmployee
+      ? "Edit Stall Map"
+      : "Reserve Stall";
   const accountPath = isAuthenticated
     ? isEmployee
       ? "/employee/dashboard"
-      : "/profile"
+      : "/me"
     : null;
   const accountLabel = isEmployee ? "Employee Portal" : "Profile";
 

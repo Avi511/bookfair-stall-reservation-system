@@ -8,25 +8,16 @@ export const getGenres = async () => {
   return res.data;
 };
 
-/**
- * Create new genre (employee)
- */
 export const createGenre = async ({ name }) => {
   const res = await api.post("/genres", { name });
   return res.data;
 };
 
-/**
- * Update genre (employee)
- */
 export const updateGenre = async ({ id, name }) => {
   const res = await api.put(`/genres/${id}`, { name });
   return res.data;
 };
 
-/**
- * Delete genre (employee)
- */
 export const deleteGenre = async (id) => {
   await api.delete(`/genres/${id}`);
 };
