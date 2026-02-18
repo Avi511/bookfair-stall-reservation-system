@@ -10,6 +10,16 @@ export const register = async ({ email, password, businessName }) => {
   return res.data;
 };
 
+export const requestRegisterOtp = async ({ email }) => {
+  const res = await api.post("/users/request-otp", { email });
+  return res.data;
+};
+
+export const registerWithOtp = async ({ email, password, businessName, otp }) => {
+  const res = await api.post("/users", { email, password, businessName, otp });
+  return res.data;
+};
+
 
 export const registerEmployee = async ({ email, password }) => {
   const res = await api.post("/employees", { email, password });
@@ -28,4 +38,3 @@ export const changePassword = async ({ currentPassword, newPassword }) => {
   });
   return res.data;
 };
-
