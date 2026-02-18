@@ -17,15 +17,12 @@ export default function StallMap({
     <div className="w-full">
       <div className="flex flex-wrap gap-2 mb-3 text-xs">
         <span className="px-2 py-1 bg-gray-200 border rounded-full">Reserved</span>
-
-        {/* show "My stalls" only if highlight list exists */}
         {highlightStallIds.length > 0 && (
           <span className="px-2 py-1 bg-purple-200 border border-purple-300 rounded-full">
             My stalls
           </span>
         )}
 
-        {/* show "Selected" only when user can select */}
         {!readOnly && (
           <span className="px-2 py-1 rounded-full bg-[var(--color-primary)] text-white">
             Selected

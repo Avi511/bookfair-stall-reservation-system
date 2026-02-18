@@ -1,6 +1,5 @@
 import React from "react";
 
-// simple styled alert box for messages and errors
 export default function Alert({ type = "info", children }) {
   const styles = {
     error: "px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50 border border-red-200",

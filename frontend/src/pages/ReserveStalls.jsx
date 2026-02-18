@@ -32,7 +32,6 @@ export default function ReserveStalls() {
     return d.toLocaleDateString();
   };
 
-  // Fetch stalls for the event
   useEffect(() => {
     let alive = true;
 
@@ -177,7 +176,6 @@ export default function ReserveStalls() {
     };
   }, [activeEventId]);
 
-  // Determine which stalls are reserved (disabled)
   const disabledStallIds = useMemo(() => {
     const disabled = [];
 
@@ -201,8 +199,6 @@ export default function ReserveStalls() {
   const maxAllowedStalls = 3;
   const alreadyReservedCount = existingReservedStallIds.length;
   const remainingSelectable = Math.max(0, maxAllowedStalls - alreadyReservedCount);
-
-  // Toggle selection (max 3)
   function onToggleSelect(stallId) {
     const exists = selected.includes(stallId);
     if (exists) {
@@ -223,7 +219,6 @@ export default function ReserveStalls() {
     setSelected((prev) => [...prev, stallId]);
   }
 
-  // Confirm reservation
   async function onConfirm() {
     if (selected.length < 1) {
       toast.error("Select at least 1 stall.");
@@ -238,23 +233,18 @@ export default function ReserveStalls() {
         stallIds: selected,
       });
 
-      // Try to extract reservation id from response
-      // supports: { id: 123 } OR { reservationId: 123 } OR { data: { id: 123 } }
       const newId =
         res?.id || res?.reservationId || res?.data?.id || res?.data?.reservationId;
 
       if (!newId) {
-        // If backend doesn’t return the id, still redirect to /me
         toast.success("Reservation confirmed successfully.");
         navigate("/me", { replace: true });
         return;
       }
 
-      // ✅ Redirect to genres page
       toast.success("Reservation confirmed successfully.");
       navigate(`/genres?reservationId=${newId}`, { replace: true });
     } catch (e) {
-      // API errors are shown globally by axios interceptor toast handling.
       if (!e?.response) {
         toast.error("Unable to confirm reservation right now. Please try again.");
       }
@@ -271,7 +261,7 @@ export default function ReserveStalls() {
         <EmptyState
           title="No active event or no stalls available"
           description="There are no stalls available for reservation at the moment. Please check back later or contact event organizers."
-          action={<button onClick={() => navigate(-1)} className="px-4 py-2 mt-4 rounded-xl border">Go Back</button>}
+          action={<button onClick={() => navigate(-1)} className="px-4 py-2 mt-4 border rounded-xl">Go Back</button>}
         />
       </div>
     );
@@ -295,7 +285,7 @@ export default function ReserveStalls() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
-        <div className="p-4 border rounded-2xl bg-white">
+        <div className="p-4 bg-white border rounded-2xl">
           <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
             Current Active Event
           </p>
@@ -313,7 +303,7 @@ export default function ReserveStalls() {
           )}
         </div>
 
-        <div className="p-4 border rounded-2xl bg-white">
+        <div className="p-4 bg-white border rounded-2xl">
           <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase">
             Next Events
           </p>
@@ -342,7 +332,7 @@ export default function ReserveStalls() {
             stalls={stalls}
             selectedStallIds={selected}
             disabledStallIds={disabledStallIds}
-            highlightStallIds={[]} // none in reserve page
+            highlightStallIds={[]}
             onToggleSelect={onToggleSelect}
           />
         </div>
@@ -376,7 +366,7 @@ export default function ReserveStalls() {
                   existingReservedStallIds.map((sid) => (
                     <span
                       key={`reserved-${sid}`}
-                      className="px-3 py-1 text-sm bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full"
+                      className="px-3 py-1 text-sm border rounded-full bg-emerald-50 text-emerald-700 border-emerald-200"
                     >
                       {stallCodeById.get(sid) || `Stall ${sid}`}
                     </span>

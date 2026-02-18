@@ -48,7 +48,6 @@ export default function Login() {
         const me = meRes?.data;
         userName = me?.businessName || me?.name || me?.email || userName;
       } catch {
-        // Keep best available value from token if /auth/me fails.
       }
 
       toast.success(`Login successful ${userName ? `- ${userName}` : ""}`);
@@ -60,7 +59,6 @@ export default function Login() {
 
       navigate(isEmployee ? "/employee/dashboard" : "/", { replace: true });
     } catch {
-      // API errors are shown globally by axios interceptor toast handling.
     } finally {
       setLoading(false);
     }

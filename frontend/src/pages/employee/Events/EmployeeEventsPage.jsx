@@ -127,8 +127,6 @@ export default function EmployeeEventsPage() {
 
   const activate = async (event) => {
     setError("");
-
-    // UI enforcement for single active event.
     if (activeEvent && activeEvent.id !== event.id) {
       setError(
         `Only one event can be ACTIVE. End "${activeEvent.name}" before activating another event.`,

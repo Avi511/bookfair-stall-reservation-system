@@ -20,11 +20,9 @@ export default function EmployeeReservations() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Filters
   const [filterEventId, setFilterEventId] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // Expandable details
   const [expandedId, setExpandedId] = useState(null);
 
   const loadData = async () => {
@@ -50,7 +48,6 @@ export default function EmployeeReservations() {
     loadData();
   }, []);
 
-  // Filter reservations
   const filteredReservations = useMemo(() => {
     let result = [...reservations];
 
@@ -141,7 +138,6 @@ export default function EmployeeReservations() {
           </div>
         )}
 
-        {/* Filters */}
         <div className="grid grid-cols-1 gap-4 p-4 mt-6 bg-white border md:grid-cols-2 rounded-2xl">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -183,13 +179,11 @@ export default function EmployeeReservations() {
           </div>
         </div>
 
-        {/* Results count */}
         <div className="mt-4 text-sm text-gray-600">
           Showing {filteredReservations.length} of {reservations.length}{" "}
           reservation(s)
         </div>
 
-        {/* Reservations list */}
         <div className="mt-4 overflow-hidden bg-white border rounded-2xl">
           {filteredReservations.length === 0 ? (
             <div className="p-6">
@@ -258,7 +252,6 @@ export default function EmployeeReservations() {
                       </button>
                     </div>
 
-                    {/* Expanded details */}
                     {isExpanded && (
                       <div className="p-4 mt-4 border rounded-xl bg-gray-50">
                         <h3 className="font-semibold text-[var(--color-dark)]">
