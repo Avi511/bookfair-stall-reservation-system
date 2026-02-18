@@ -20,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -66,7 +65,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // IMPORTANT: use allowedOriginPatterns when allowCredentials(true)
+
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
@@ -90,8 +89,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/events/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/events/active").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/users/request-otp").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/auth/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/auth/reset-password").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/stalls/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/genres/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
@@ -100,6 +102,9 @@ public class SecurityConfig {
                         .hasRole(Role.USER.name())
 
                         .requestMatchers(HttpMethod.GET,"/api/reservations")
+                        .hasRole(Role.EMPLOYEE.name())
+
+                        .requestMatchers(HttpMethod.PUT,"/api/reservations/employee/*")
                         .hasRole(Role.EMPLOYEE.name())
 
                         .requestMatchers("/api/employees/**")
@@ -133,10 +138,16 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(c -> {
-                    c.authenticationEntryPoint(
-                            new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
-                    c.accessDeniedHandler((request, response, accessDeniedException) ->
-                            response.setStatus(HttpStatus.FORBIDDEN.value()));
+                    c.authenticationEntryPoint((request, response, ex) -> {
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"message\":\"Unauthorized\"}");
+                    });
+                    c.accessDeniedHandler((request, response, ex) -> {
+                        response.setStatus(HttpStatus.FORBIDDEN.value());
+                        response.setContentType("application/json");
+                        response.getWriter().write("{\"message\":\"Forbidden\"}");
+                    });
                 });
 
         return http.build();
