@@ -72,7 +72,7 @@ const AppRoutes = () => {
             <Route path="/stall-map" element={<StallMapViewer />} />
             <Route path="/stall-map/:eventId" element={<StallMapViewer />} />
 
-            
+            {/* employee area - protected routes */}
             <Route
               path="/employee"
               element={
@@ -91,6 +91,7 @@ const AppRoutes = () => {
               <Route path="genres" element={<EmployeeGenresPage />} />
             </Route>
 
+            {/* catch-all should show 404 now */}
             <Route path="*" element={<NotFound />} />
         </Routes>
     );

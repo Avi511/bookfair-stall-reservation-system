@@ -27,6 +27,9 @@ export default function Stall({
   const top = GRID.PAD + (gridY - 1) * (GRID.CELL + GRID.GAP);
   const width = dim.w * GRID.CELL + (dim.w - 1) * GRID.GAP;
   const height = dim.h * GRID.CELL + (dim.h - 1) * GRID.GAP;
+
+  // Priority of colors:
+  // disabled (reserved by others) > selected > highlighted (mine) > normal
   let bgClass = "bg-white";
   let borderClass = "border-gray-300";
 

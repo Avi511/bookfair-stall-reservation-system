@@ -18,6 +18,7 @@ const defaultMessages = [
 
 const MessageBar = ({ messages = defaultMessages }) => {
   const [index, setIndex] = useState(0);
+  // always visible; no hidden state
 
   useEffect(() => {
     const t = setInterval(() => {
@@ -34,12 +35,12 @@ const MessageBar = ({ messages = defaultMessages }) => {
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-center gap-3 py-2 border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center rounded-md w-7 h-7 bg-white/10">
+            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-white/10">
               <Megaphone className="w-4 h-4 text-white" />
             </div>
             <p
               key={messages[index]?.id ?? index}
-              className="text-sm font-medium text-center text-white/90 message-fade"
+              className="text-sm font-medium text-white/90 message-fade text-center"
             >
               {messages[index]?.text}
             </p>

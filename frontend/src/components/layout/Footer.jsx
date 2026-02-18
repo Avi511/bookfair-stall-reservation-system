@@ -7,6 +7,7 @@ const Footer = () => {
       <div className="pt-12 pb-8 text-white border-t border-white/10 bg-primary">
         <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
+            {/* Column 1: Organizer Info */}
             <div>
               <h3 className="mb-4 text-lg font-bold">Organized By</h3>
               <p className="text-sm leading-relaxed text-white/80">
@@ -14,6 +15,8 @@ const Footer = () => {
                 Promoting the love for reading across the island.
               </p>
             </div>
+
+            {/* Column 2: Quick Links */}
             <div>
               <h3 className="mb-4 text-lg font-bold">Quick Links</h3>
               <ul className="space-y-2 text-sm text-white/80">
@@ -37,6 +40,8 @@ const Footer = () => {
                 </li>
               </ul>
             </div>
+
+            {/* Column 3: Contact */}
             <div>
               <h3 className="mb-4 text-lg font-bold">Contact Us</h3>
               <p className="text-sm text-white/80">BMICH, Colombo, Sri Lanka</p>

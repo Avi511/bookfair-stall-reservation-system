@@ -4,7 +4,9 @@ import { getAccessToken, setAccessToken, clearAccessToken } from '../api/axiosIn
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Stores user info and role
+
+  // Initialize user from token if available (token parsing left to callers)
   useEffect(() => {
     const token = getAccessToken();
     if (!token) return;
@@ -21,8 +23,11 @@ export const AuthProvider = ({ children }) => {
       const role = payload?.role || payload?.roles?.[0];
       setUser({ ...payload, role });
     } catch {
+      // ignore malformed token
     }
   }, []);
+
+  // Listen for logout events (dispatched by axios on session expiry)
   useEffect(() => {
     const handler = () => setUser(null);
     const storageHandler = (e) => {

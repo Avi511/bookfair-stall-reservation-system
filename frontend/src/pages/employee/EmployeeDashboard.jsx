@@ -48,6 +48,8 @@ export default function EmployeeDashboard() {
       events.find((ev) => String(ev.status).toUpperCase() === "ACTIVE") || null,
     [events],
   );
+
+  // Calculate metrics for active event
   const metrics = useMemo(() => {
     if (!activeEvent) {
       return {
@@ -109,6 +111,7 @@ export default function EmployeeDashboard() {
       setEmployeePassword("");
       setEmployeeConfirmPassword("");
     } catch (e2) {
+      // API errors are shown globally by axios interceptor toast handling.
       if (!e2?.response) {
         toast.error("Failed to create employee. Please try again.");
       }
@@ -170,10 +173,10 @@ export default function EmployeeDashboard() {
           </div>
         )}
 
-        
+        {/* Active Event Section */}
         <div className="mt-6">
           {activeEvent ? (
-            <div className="p-4 border border-blue-200 rounded-2xl bg-blue-50">
+            <div className="p-4 border rounded-2xl bg-blue-50 border-blue-200">
               <h2 className="text-lg font-semibold text-blue-900">
                 Active Event
               </h2>
@@ -189,7 +192,7 @@ export default function EmployeeDashboard() {
               </div>
             </div>
           ) : (
-            <div className="p-4 border border-yellow-200 rounded-2xl bg-yellow-50">
+            <div className="p-4 border rounded-2xl bg-yellow-50 border-yellow-200">
               <h2 className="text-lg font-semibold text-yellow-900">
                 No Active Event
               </h2>
@@ -201,7 +204,7 @@ export default function EmployeeDashboard() {
           )}
         </div>
 
-        
+        {/* Summary Cards */}
         <div className="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2 lg:grid-cols-2">
           <div className="p-6 bg-white border rounded-2xl">
             <div className="flex items-center justify-between">
@@ -213,7 +216,7 @@ export default function EmployeeDashboard() {
                   {metrics.totalReservations}
                 </p>
               </div>
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100">
                 <svg
                   className="w-6 h-6 text-blue-600"
                   fill="none"
@@ -266,7 +269,7 @@ export default function EmployeeDashboard() {
           </div>
         </div>
 
-        
+        {/* Quick Navigation */}
         <div className="mt-8">
           <h2 className="text-lg font-semibold text-[var(--color-dark)]">
             Quick Navigation
@@ -277,7 +280,7 @@ export default function EmployeeDashboard() {
               className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
             >
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-lg">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-100">
                   <svg
                     className="w-5 h-5 text-purple-600"
                     fill="none"
@@ -306,7 +309,7 @@ export default function EmployeeDashboard() {
               className="p-4 transition-shadow bg-white border rounded-2xl hover:shadow-md"
             >
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-orange-100 rounded-lg">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-100">
                   <svg
                     className="w-5 h-5 text-orange-600"
                     fill="none"

@@ -20,6 +20,7 @@ export default function EditReservation() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // --- helpers to tolerate different backend shapes ---
   const reservationEventId = useMemo(() => {
     if (!reservation) return null;
     return (
@@ -32,11 +33,13 @@ export default function EditReservation() {
 
   const reservationStallIds = useMemo(() => {
     if (!reservation) return [];
+    // supports: stallIds: [1,2] OR stalls: [{id:1},{id:2}]
     if (Array.isArray(reservation.stallIds)) return reservation.stallIds;
     if (Array.isArray(reservation.stalls)) return reservation.stalls.map((s) => s.id);
     return [];
   }, [reservation]);
 
+  // Load reservation + stalls
   useEffect(() => {
     let alive = true;
 
@@ -89,6 +92,12 @@ export default function EditReservation() {
     };
   }, [id]);
 
+  // Determine disabled stalls (reserved by others) + highlight (mine)
+  // This depends on backend stall fields. We handle common possibilities:
+  // - stall.reserved === true
+  // - stall.isReserved === true
+  // - stall.reservationId exists
+  // - stall.reservedByReservationId exists
   const { disabledStallIds, highlightStallIds } = useMemo(() => {
     const mine = new Set(reservationStallIds);
     const disabled = [];
@@ -100,6 +109,7 @@ export default function EditReservation() {
         (typeof s.reservationId === "number" && s.reservationId > 0) ||
         (typeof s.reservedByReservationId === "number" && s.reservedByReservationId > 0);
 
+      // If reserved AND not mine => disabled
       if (isReserved && !mine.has(s.id)) disabled.push(s.id);
     }
 
@@ -109,6 +119,7 @@ export default function EditReservation() {
     };
   }, [stalls, reservationStallIds]);
 
+  // Toggle select with max 3 rule
   function onToggleSelect(stallId) {
     setError("");
 
@@ -144,6 +155,7 @@ export default function EditReservation() {
       setSaving(true);
       await updateReservation(id, { stallIds: selected });
 
+      // success
       toast.success("Reservation updated successfully.");
       navigate("/me", { replace: true });
     } catch (e) {
