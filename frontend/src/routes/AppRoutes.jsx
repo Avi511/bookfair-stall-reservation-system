@@ -9,6 +9,8 @@ import Register from "../pages/Register";
 import ReserveStalls from "../pages/ReserveStalls";
 import Genres from "../pages/genres";
 import Profile from "../pages/Profile";
+import ChangePassword from "../pages/ChangePassword";
+import ForgotPassword from "../pages/ForgotPassword";
 import EditReservation from "../pages/EditReservation";
 import StallMapViewer from "../pages/StallMapViewer";
 import RequireRole from "../auth/RequireRole";
@@ -29,6 +31,7 @@ const AppRoutes = () => {
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route
         path="/reserve-stalls"
         element={
@@ -66,6 +69,14 @@ const AppRoutes = () => {
         element={
           <RequireRole roles={["USER", "ROLE_USER"]} redirectTo="/">
             <Profile />
+          </RequireRole>
+        }
+      />
+      <Route
+        path="/change-password"
+        element={
+          <RequireRole roles={["USER", "ROLE_USER"]} redirectTo="/">
+            <ChangePassword />
           </RequireRole>
         }
       />

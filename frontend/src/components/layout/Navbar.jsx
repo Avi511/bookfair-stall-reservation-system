@@ -46,9 +46,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="relative sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-xl">
-      <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-90" />
-
+    <nav className="relative sticky top-0 z-50 w-full border-b border-blue-800 bg-blue-700">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 group">
@@ -90,7 +88,7 @@ const Navbar = () => {
             {showPrimaryAction && (
               <Link
                 to={actionPath}
-                className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-gradient-to-r from-secondary to-accent hover:scale-105"
+                className="relative inline-flex items-center px-6 py-2.5 overflow-hidden font-semibold text-white transition-all duration-300 rounded-lg group bg-blue-900 hover:bg-blue-950"
               >
                 <span className="relative flex items-center gap-2">
                   {actionLabel}
@@ -104,9 +102,7 @@ const Navbar = () => {
                 to={accountPath}
                 aria-label={accountLabel}
                 className={`inline-flex items-center font-semibold text-white/90 border border-white/30 hover:bg-white/10 ${
-                  isEmployee
-                    ? "px-5 py-2.5 rounded-lg"
-                    : "p-2.5 rounded-full"
+                  isEmployee ? "px-5 py-2.5 rounded-lg" : "p-2.5 rounded-full"
                 }`}
               >
                 {isEmployee ? accountLabel : <User className="w-5 h-5" />}
@@ -145,9 +141,7 @@ const Navbar = () => {
           isMobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="relative px-4 pt-2 pb-6 space-y-2 border-t border-white/10 backdrop-blur-xl">
-          <div className="absolute inset-0 -z-10 nav-animated-gradient opacity-95" />
-
+        <div className="relative px-4 pt-2 pb-6 space-y-2 border-t border-blue-800 bg-blue-700">
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -167,7 +161,7 @@ const Navbar = () => {
             <Link
               to={actionPath}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center justify-center w-full gap-2 px-4 py-3 mt-4 text-base font-semibold text-white rounded-lg bg-gradient-to-r from-secondary to-accent active:scale-95"
+              className="flex items-center justify-center w-full gap-2 px-4 py-3 mt-4 text-base font-semibold text-white rounded-lg bg-blue-900 hover:bg-blue-950 active:scale-95"
             >
               {actionLabel} <ChevronRight className="w-4 h-4" />
             </Link>

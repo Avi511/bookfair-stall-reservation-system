@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import Loading from "../components/common/Loading";
@@ -10,6 +10,7 @@ import {
 } from "../api/genres.api";
 
 export default function Genres() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const reservationId = searchParams.get("reservationId");
 
@@ -32,13 +33,13 @@ export default function Genres() {
       ]);
 
       const genreList = Array.isArray(allGenres) ? allGenres : [];
-      const selected = Array.isArray(reservationGenres) ? reservationGenres : [];
+      const selected = Array.isArray(reservationGenres)
+        ? reservationGenres
+        : [];
 
       setGenres(genreList);
       setSelectedGenreIds(
-        selected
-          .map((g) => g?.id)
-          .filter((id) => Number.isInteger(id)),
+        selected.map((g) => g?.id).filter((id) => Number.isInteger(id)),
       );
     } catch (e) {
       const msg =
@@ -74,6 +75,7 @@ export default function Genres() {
         genreIds: selectedGenreIds,
       });
       toast.success("Genres updated successfully.");
+      navigate("/", { replace: true });
     } catch (e) {
       const msg =
         e?.response?.data?.message ||
@@ -155,24 +157,24 @@ export default function Genres() {
           genres
             .filter((genre) => selectedGenreIds.includes(genre?.id))
             .map((genre, index) => (
-            <div
-              key={genre?.id || genre?.name || index}
-              className="flex items-center justify-between p-4 bg-white border rounded-2xl"
-            >
-              <div>
-                <p className="text-sm font-semibold text-[var(--color-dark)]">
-                  {genre?.name || genre?.genre || "Untitled"}
-                </p>
-                {genre?.description && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    {genre.description}
+              <div
+                key={genre?.id || genre?.name || index}
+                className="flex items-center justify-between p-4 bg-white border rounded-2xl"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-[var(--color-dark)]">
+                    {genre?.name || genre?.genre || "Untitled"}
                   </p>
-                )}
+                  {genre?.description && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      {genre.description}
+                    </p>
+                  )}
+                </div>
+                <span className="px-3 py-1 text-xs text-gray-500 bg-gray-100 border rounded-full">
+                  Selected
+                </span>
               </div>
-              <span className="px-3 py-1 text-xs text-gray-500 bg-gray-100 border rounded-full">
-                Selected
-              </span>
-            </div>
             ))
         )}
       </div>
