@@ -6,12 +6,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.example.backend.config.JwtConfig;
-import org.example.backend.dtos.JwtResponse;
-import org.example.backend.dtos.LoginRequest;
-import org.example.backend.dtos.UserDto;
+import org.example.backend.dtos.*;
 import org.example.backend.services.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @AllArgsConstructor
@@ -47,6 +47,28 @@ public class AuthController {
 
         return ResponseEntity.ok(new JwtResponse(accessToken));
     }
+
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @RequestBody EmailRequest request
+    ) {
+        return ResponseEntity.ok(
+                Map.of(
+                        "message",
+                        "If the email exists, OTP sent to " + authService.forgotPassword(request))
+        );
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(
+            @RequestBody ResetPasswordRequest request
+    ) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Password updated"));
+    }
+
+
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> me() {

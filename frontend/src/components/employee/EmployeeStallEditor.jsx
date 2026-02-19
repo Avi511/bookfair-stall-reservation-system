@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Loading from "../common/Loading";
 import Alert from "../common/Alert";
 import {
@@ -71,7 +72,6 @@ export default function EmployeeStallEditor() {
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
 
   const [newCode, setNewCode] = useState("");
@@ -92,7 +92,6 @@ export default function EmployeeStallEditor() {
   const fetchAll = async () => {
     setLoading(true);
     setError("");
-    setMsg("");
 
     if (!ensureAccessToken()) {
       setError("Please login first.");
@@ -266,11 +265,10 @@ export default function EmployeeStallEditor() {
         ),
       );
       clearDraft(id);
-      setMsg(`Saved ${stall.stallCode} at (${d.x}, ${d.y}).`);
+      toast.success(`Saved ${stall.stallCode} at (${d.x}, ${d.y}).`);
       setError("");
     } catch (e) {
       setError(extractApiError(e, "Update failed."));
-      setMsg("");
       setDrafts((prev) => ({
         ...prev,
         [id]: { ...prev[id], saving: false },
@@ -283,12 +281,11 @@ export default function EmployeeStallEditor() {
   const cancelDraft = (id) => {
     if (!drafts[id]) return;
     clearDraft(id);
-    setMsg("Draft canceled.");
+    toast.success("Draft canceled.");
     setError("");
   };
 
   const onMouseDown = async (e, s) => {
-    setMsg("");
     setError("");
 
     if (activeDraftId && activeDraftId !== s.id) {
@@ -376,7 +373,6 @@ export default function EmployeeStallEditor() {
   }, [drag, onMouseMove, onMouseUp]);
 
   const addStall = async () => {
-    setMsg("");
     setError("");
 
     const code = newCode.trim();
@@ -424,7 +420,7 @@ export default function EmployeeStallEditor() {
         await fetchAll();
       }
 
-      setMsg(`Added ${code} (${newSize}).`);
+      toast.success(`Added ${code} (${newSize}).`);
       setNewCode("");
     } catch (e) {
       setError(extractApiError(e, "Create failed."));
@@ -434,7 +430,6 @@ export default function EmployeeStallEditor() {
   };
 
   const deleteStall = async (id) => {
-    setMsg("");
     setError("");
 
     if (!ensureAccessToken()) {
@@ -447,7 +442,7 @@ export default function EmployeeStallEditor() {
       await deleteStallApi(id);
       setStalls((prev) => prev.filter((s) => s.id !== id));
       clearDraft(id);
-      setMsg("Deleted stall.");
+      toast.success("Deleted stall.");
     } catch (e) {
       setError(extractApiError(e, "Delete failed."));
     } finally {
@@ -482,7 +477,6 @@ export default function EmployeeStallEditor() {
       )}
 
       {error && <Alert type="error">{error}</Alert>}
-      {msg && <Alert type="success">{msg}</Alert>}
 
       <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
         <div className="lg:col-span-2">

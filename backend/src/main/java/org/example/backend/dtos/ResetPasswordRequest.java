@@ -1,27 +1,24 @@
 package org.example.backend.dtos;
 
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.example.backend.validations.Lowercase;
 
 @Data
-public class RegisterUserRequest {
-    @NotBlank(message = "Name is required.")
-    @Size(max = 255, message = "Name must be less than 255 characters.")
-    private String businessName;
-
+public class ResetPasswordRequest {
     @NotBlank(message = "Email is required.")
     @Email(message = "Email must be valid.")
     @Lowercase(message = "Email must be lowercase.")
     private String email;
 
-    @NotBlank(message = "Password is required.")
-    @Size(min = 6, max = 25, message = "Password must be between 6 to 25 characters long.")
-    private String password;
-
     @NotBlank(message = "Otp is required.")
-    String otp;
+    @Pattern(regexp = "\\d{6}", message = "Otp must be exactly 6 digits.")
+    private String otp;
+
+    @NotBlank(message = "New password is required.")
+    @Size(min = 6, max = 25, message = "New password must be between 6 to 25 characters long.")
+    private String newPassword;
 }

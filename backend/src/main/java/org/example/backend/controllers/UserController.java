@@ -3,14 +3,13 @@ package org.example.backend.controllers;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.example.backend.dtos.ChangePasswordRequest;
-import org.example.backend.dtos.RegisterUserRequest;
-import org.example.backend.dtos.UpdateUserRequest;
-import org.example.backend.dtos.UserDto;
+import org.example.backend.dtos.*;
 import org.example.backend.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Map;
 
 @AllArgsConstructor
 @RestController
@@ -24,10 +23,22 @@ public class UserController {
             @Valid @RequestBody RegisterUserRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        var userDto = userService.registerBusinessUser(request);
-        var uri = uriBuilder.path("/api/users/{id}").buildAndExpand(userDto.getId()).toUri();
+
+        var userDto = userService.verifyOtpAndCreateUser(request);
+        var uri =  uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
         return ResponseEntity.created(uri).body(userDto);
     }
+
+    @PostMapping("/request-otp")
+    public ResponseEntity<?> requestRegisterOtp(
+            @Valid @RequestBody EmailRequest request
+    ) {
+        var masked = userService.requestRegistrationOtp(request);
+        return ResponseEntity.ok(
+                Map.of("message", "OTP sent to " + masked)
+        );
+    }
+
 
     @PutMapping
     public ResponseEntity<UserDto> updateUser(

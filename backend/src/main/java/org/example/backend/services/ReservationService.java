@@ -28,6 +28,7 @@ public class ReservationService {
     private final GenreMapper genreMapper;
     private final QrCodeService qrCodeService;
     private final EmailService emailService;
+    private final AuthService authService;
 
     @Transactional
     public List<ReservationDto> listReservations(Long userId, Integer eventId) {
@@ -132,6 +133,17 @@ public class ReservationService {
                 "User can only cancel own reservation."
         );
 
+        return getReservationDto(reservationId, reservation);
+    }
+
+    @Transactional
+    public ReservationDto cancelReservation(Long reservationId) {
+        var reservation = reservationRepository.findById(reservationId).orElseThrow(() -> new IllegalArgumentException("Reservation not found"));
+
+        return getReservationDto(reservationId, reservation);
+    }
+
+    private ReservationDto getReservationDto(Long reservationId, Reservation reservation) {
         if(reservation.getStatus() == ReservationStatus.CANCELLED) {
             return reservationMapper.toDto(reservation);
         }
@@ -143,6 +155,7 @@ public class ReservationService {
         var fresh = reservationRepository.findByIdWithStalls(reservationId);
         return reservationMapper.toDto(fresh);
     }
+
 
     @Transactional
     public ReservationDto updateReservation(Long userId, Long reservationId, List<Long> newStallIds) {
