@@ -38,3 +38,13 @@ export const changePassword = async ({ currentPassword, newPassword }) => {
   });
   return res.data;
 };
+
+export const forgotPassword = async ({ email }) => {
+  const res = await api.post("/auth/forgot-password", { email });
+  return res.data;
+};
+
+export const resetPassword = async ({ email, otp, newPassword }) => {
+  const res = await api.post("/auth/reset-password", { email, otp, newPassword });
+  return res.data;
+};

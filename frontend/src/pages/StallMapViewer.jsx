@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import StallMap from "../components/stalls/StallMap";
 import Loading from "../components/common/Loading";
 import { getStallsByEvent } from "../api/stalls.api";
@@ -8,7 +9,6 @@ import { getActiveEvent } from "../api/events.api";
 export default function StallMapViewer() {
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -16,7 +16,6 @@ export default function StallMapViewer() {
     async function run() {
       try {
         setLoading(true);
-        setError("");
         const active = await getActiveEvent();
         const activeEvent = Array.isArray(active) ? active[0] : active;
         const activeEventId = Number(activeEvent?.id) || null;
@@ -38,7 +37,9 @@ export default function StallMapViewer() {
         const msg = text.includes("active")
           ? "No active event is available right now."
           : "Unable to load the map right now. Please try again.";
-        setError(msg);
+        if (!e?.response) {
+          toast.error(msg);
+        }
       } finally {
         if (alive) setLoading(false);
       }
@@ -72,12 +73,6 @@ export default function StallMapViewer() {
           Home
         </Link>
       </div>
-
-      {error && (
-        <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
-          {error}
-        </div>
-      )}
 
       <div className="mt-6">
         <StallMap

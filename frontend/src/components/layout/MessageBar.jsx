@@ -4,7 +4,7 @@ import { Megaphone } from "lucide-react";
 const defaultMessages = [
   {
     id: 1,
-    text: "Welcome to Colombo International Bookfair — Stall reservations now open!",
+    text: "Welcome to ExpoHub — Stall reservations now open!",
   },
   {
     id: 2,

@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loading from "../common/Loading";
-import Alert from "../common/Alert";
 import {
   createStall,
   deleteStall as deleteStallApi,
@@ -21,9 +20,6 @@ const GRID = {
   GAP: 6,
   PAD: 10,
 };
-
-const getSessionToken = () =>
-  localStorage.getItem("accessToken") || localStorage.getItem("token");
 
 const ensureAccessToken = () => {
   const accessToken = localStorage.getItem("accessToken");
@@ -72,7 +68,6 @@ export default function EmployeeStallEditor() {
   const [stalls, setStalls] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
 
   const [newCode, setNewCode] = useState("");
   const [newSize, setNewSize] = useState("SMALL");
@@ -87,14 +82,11 @@ export default function EmployeeStallEditor() {
   const [drafts, setDrafts] = useState({});
   const [activeDraftId, setActiveDraftId] = useState(null);
 
-  const isAuthed = Boolean(getSessionToken());
-
   const fetchAll = async () => {
     setLoading(true);
-    setError("");
 
     if (!ensureAccessToken()) {
-      setError("Please login first.");
+      toast.error("Please login first.");
       setLoading(false);
       return;
     }
@@ -105,7 +97,9 @@ export default function EmployeeStallEditor() {
       setDrafts({});
       setActiveDraftId(null);
     } catch (e) {
-      setError(extractApiError(e, "Failed to load stalls."));
+      if (!e?.response) {
+        toast.error(extractApiError(e, "Failed to load stalls."));
+      }
     } finally {
       setLoading(false);
     }
@@ -232,7 +226,7 @@ export default function EmployeeStallEditor() {
     if (!d) return;
 
     if (!ensureAccessToken()) {
-      setError("Please login first.");
+      toast.error("Please login first.");
       return;
     }
 
@@ -241,7 +235,7 @@ export default function EmployeeStallEditor() {
 
     const nextRect = { ...rectFor(id) };
     if (!canPlace(id, nextRect)) {
-      setError("Overlap detected. Cannot confirm.");
+      toast.error("Overlap detected. Cannot confirm.");
       return;
     }
 
@@ -266,9 +260,10 @@ export default function EmployeeStallEditor() {
       );
       clearDraft(id);
       toast.success(`Saved ${stall.stallCode} at (${d.x}, ${d.y}).`);
-      setError("");
     } catch (e) {
-      setError(extractApiError(e, "Update failed."));
+      if (!e?.response) {
+        toast.error(extractApiError(e, "Update failed."));
+      }
       setDrafts((prev) => ({
         ...prev,
         [id]: { ...prev[id], saving: false },
@@ -282,12 +277,9 @@ export default function EmployeeStallEditor() {
     if (!drafts[id]) return;
     clearDraft(id);
     toast.success("Draft canceled.");
-    setError("");
   };
 
   const onMouseDown = async (e, s) => {
-    setError("");
-
     if (activeDraftId && activeDraftId !== s.id) {
       await confirmDraft(activeDraftId);
     }
@@ -373,16 +365,14 @@ export default function EmployeeStallEditor() {
   }, [drag, onMouseMove, onMouseUp]);
 
   const addStall = async () => {
-    setError("");
-
     const code = newCode.trim();
     if (!code) {
-      setError("Enter stall code.");
+      toast.error("Enter stall code.");
       return;
     }
 
     if (!ensureAccessToken()) {
-      setError("Please login first.");
+      toast.error("Please login first.");
       return;
     }
 
@@ -401,7 +391,7 @@ export default function EmployeeStallEditor() {
     }
 
     if (!found) {
-      setError("No space available. Rearrange stalls or increase map area.");
+      toast.error("No space available. Rearrange stalls or increase map area.");
       return;
     }
 
@@ -423,17 +413,17 @@ export default function EmployeeStallEditor() {
       toast.success(`Added ${code} (${newSize}).`);
       setNewCode("");
     } catch (e) {
-      setError(extractApiError(e, "Create failed."));
+      if (!e?.response) {
+        toast.error(extractApiError(e, "Create failed."));
+      }
     } finally {
       setSaving(false);
     }
   };
 
   const deleteStall = async (id) => {
-    setError("");
-
     if (!ensureAccessToken()) {
-      setError("Please login first.");
+      toast.error("Please login first.");
       return;
     }
 
@@ -444,7 +434,9 @@ export default function EmployeeStallEditor() {
       clearDraft(id);
       toast.success("Deleted stall.");
     } catch (e) {
-      setError(extractApiError(e, "Delete failed."));
+      if (!e?.response) {
+        toast.error(extractApiError(e, "Delete failed."));
+      }
     } finally {
       setSaving(false);
     }
@@ -469,14 +461,6 @@ export default function EmployeeStallEditor() {
           Back
         </button>
       </div>
-
-      {!isAuthed && (
-        <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
-          Please login first.
-        </div>
-      )}
-
-      {error && <Alert type="error">{error}</Alert>}
 
       <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
