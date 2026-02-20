@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Lock, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { getMyReservations, cancelReservation } from "../api/reservations.api";
 import { getGenresByReservation } from "../api/genres.api";
@@ -15,9 +14,6 @@ export default function Profile() {
   const [cancelingId, setCancelingId] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(null);
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const { user } = useAuth();
-  const userEmail = user?.payload?.email || user?.payload?.sub || "User";
-  const userName = user?.payload?.name || "My Account";
 
   const loadReservationGenres = async (reservationList) => {
     const ids = (Array.isArray(reservationList) ? reservationList : [])
@@ -188,35 +184,7 @@ export default function Profile() {
         </p>
       </div>
 
-      <div className="grid gap-4 mb-6 md:grid-cols-[1fr_auto]">
-        <div className="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100">
-                <User className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-widest">
-                  Account
-                </div>
-                <div className="text-sm font-semibold text-gray-900">
-                  {userName}
-                </div>
-                <div className="text-xs text-gray-600">{userEmail}</div>
-              </div>
-            </div>
-            <Link
-              to="/change-password"
-              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold text-white rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors"
-            >
-              <Lock className="w-4 h-4" />
-              Change Password
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid items-end gap-4 p-4 mb-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
+      <div className="grid items-end gap-4 p-4 mb-6 bg-white border border-gray-200 shadow-sm md:grid-cols-[1fr_auto] rounded-2xl">
         <div>
           <label className="block mb-2 text-base font-semibold text-gray-800">
             Filter by Status
@@ -232,6 +200,13 @@ export default function Profile() {
             <option value="CANCELLED">Cancelled</option>
           </select>
         </div>
+
+        <Link
+          to="/change-password"
+          className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white rounded-xl bg-[var(--color-primary)] hover:opacity-95"
+        >
+          Change Password
+        </Link>
       </div>
 
       {filteredReservations.length === 0 ? (

@@ -3,14 +3,13 @@
 @tailwind utilities;
 
 :root {
-  /* Professional brand palette */
-  --color-primary: #0f172a; /* deep slate/navy for headers/nav */
-  --color-secondary: #1d4ed8; /* indigo 700 for CTAs */
-  --color-accent: #00b7b5; /* teal for highlights */
-  --color-background: #f8fafc; /* light neutral background */
-  --color-dark: #0b1220; /* near-black for strong contrast */
-  /* optional derived tokens */
-  --nav-overlay: rgba(15, 23, 42, 0.92);
+  /* Professional blue palette */
+  --color-primary: #0b1f3b; /* navy */
+  --color-secondary: #1f4fbf; /* refined CTA blue */
+  --color-accent: #6ea8ff; /* soft highlight */
+  --color-background: #f3f6fb; /* cool neutral background */
+  --color-dark: #081529; /* near-black navy */
+  --nav-overlay: rgba(11, 31, 59, 0.92);
 }
 
 body {
@@ -99,21 +98,9 @@ body {
 }
 .message-fade {
   animation: msg-fade-slide 500ms ease both;
-  /* Blue theme color palette */
-  --color-primary: #1E6FF3;     /* vivid blue (CTA) */
-  --color-secondary: #60A5FA;   /* lighter blue */
-  --color-accent: #EAF4FF;      /* very light blue / accent */
-  --color-background: #F8FBFF;  /* near-white blue tint */
-  --color-dark: #08203B;        /* deep navy for nav/footer */
+}
 
-  /* Navbar specific variables */
-  --navbar-bg: var(--color-dark);
-  --navbar-text: var(--color-accent);
-  --navbar-cta: var(--color-primary);
-  --navbar-border: var(--color-secondary);
-}   /* ✅ YOU MISSED THIS CLOSING BRACE */
-
- /* Navbar fallback styles using the project's CSS color variables */
+/* Navbar fallback styles using the project's CSS color variables */
 .navbar {
   background-color: var(--navbar-bg);
   color: var(--navbar-text);

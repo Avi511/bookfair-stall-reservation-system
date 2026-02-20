@@ -51,7 +51,7 @@ const Footer = () => {
             <div>
               <h3 className="mb-4 text-lg font-bold">Contact Us</h3>
               <p className="text-sm text-white/80">BMICH, Colombo, Sri Lanka</p>
-              <p className="text-sm text-white/80">Email: info@expohub.lk</p>
+              <p className="text-sm text-white/80">Email: info@bookfair.lk</p>
             </div>
           </div>
 
