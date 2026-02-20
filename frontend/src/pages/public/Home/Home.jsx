@@ -10,7 +10,7 @@ const Home = () => {
   const { isAuthenticated } = useAuth();
   const isLoggedIn = isAuthenticated;
 
-  const [eventName, setEventName] = useState("Book Fair Event");
+  const [eventName, setEventName] = useState("ExpoHub Event");
   const [mapStalls, setMapStalls] = useState([]);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapError, setMapError] = useState("");
@@ -31,7 +31,7 @@ const Home = () => {
         if (!alive) return;
 
         const resolvedEventName = String(activeEvent?.name || "").trim();
-        setEventName(resolvedEventName || "Book Fair Event");
+        setEventName(resolvedEventName || "ExpoHub Event");
 
         const eventId = Number(activeEvent?.id) || null;
         if (!eventId) {
@@ -112,12 +112,18 @@ const Home = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-secondary/10 via-white to-accent/10" />
         <div className="relative grid items-center max-w-6xl gap-12 px-4 py-16 mx-auto md:py-24 md:grid-cols-2">
           <div>
-            <p className="text-sm font-semibold tracking-widest uppercase text-accent">
-              {eventName}
-            </p>
-            <h1 className="mt-3 text-4xl font-bold md:text-5xl text-slate-900">
-              Reserve your stall in Sri Lanka&apos;s largest book exhibition
+            <div className="inline-flex items-center gap-3 rounded-full border border-white/70 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-slate-600 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              Active event
+            </div>
+            <h1 className="mt-4 text-4xl font-extrabold leading-tight text-slate-900 md:text-6xl">
+              <span className="bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent">
+                {eventName}
+              </span>
             </h1>
+            <p className="mt-4 text-xl font-semibold text-slate-800 md:text-2xl">
+              Reserve your stall in Sri Lanka&apos;s largest book exhibition
+            </p>
             <p className="mt-5 text-lg text-slate-600">
               A modern reservation platform for publishers and vendors to book
               stalls, manage confirmations, and receive QR-based entry passes
