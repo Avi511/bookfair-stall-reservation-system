@@ -18,12 +18,10 @@ export default function Register() {
 
   const [loading, setLoading] = useState(false);
   const [requestingOtp, setRequestingOtp] = useState(false);
-  const [error, setError] = useState("");
 
   async function handleRequestOtp() {
-    setError("");
     if (!email.trim()) {
-      setError("Email is required.");
+      toast.error("Email is required.");
       return;
     }
 
@@ -34,12 +32,9 @@ export default function Register() {
       toast.success(msg);
       setOtpRequested(true);
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to send OTP";
-      setError(msg);
+      if (!err?.response) {
+        toast.error(err?.message || "Failed to send OTP");
+      }
     } finally {
       setRequestingOtp(false);
     }
@@ -47,14 +42,13 @@ export default function Register() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
     if (!otp.trim()) {
-      setError("OTP is required.");
+      toast.error("OTP is required.");
       return;
     }
 
@@ -70,12 +64,9 @@ export default function Register() {
       toast.success("Account created successfully. Please login.");
       navigate("/login", { replace: true });
     } catch (err) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data?.error ||
-        err?.message ||
-        "Registration failed";
-      setError(msg);
+      if (!err?.response) {
+        toast.error(err?.message || "Registration failed");
+      }
     } finally {
       setLoading(false);
     }
@@ -85,11 +76,6 @@ export default function Register() {
     <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
       <div className="w-full max-w-md p-6 bg-white shadow rounded-2xl">
         <h1 className="text-2xl font-bold text-[var(--color-dark)]">Register</h1>
-        {error && (
-          <div className="px-4 py-3 mt-4 text-sm text-red-700 rounded-xl bg-red-50">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
