@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, Menu, X, ChevronRight, User } from "lucide-react";
+import { LayoutGrid, Menu, X, ChevronRight, User } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -51,11 +51,11 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 group">
             <div className="flex items-center justify-center w-10 h-10 transition-transform duration-300 rounded-xl bg-gradient-to-tr from-accent to-secondary group-hover:rotate-6">
-              <BookOpen className="w-6 h-6 text-white" />
+              <LayoutGrid className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold tracking-tight text-white">
-                Colombo<span className="text-accent">Bookfair</span>
+                Expo<span className="text-accent">Hub</span>
               </span>
               <span className="text-[0.65rem] font-medium text-gray-300 uppercase tracking-widest">
                 Stall Reservation

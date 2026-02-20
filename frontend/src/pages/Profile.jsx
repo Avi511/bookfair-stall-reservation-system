@@ -5,6 +5,7 @@ import { getMyReservations, cancelReservation } from "../api/reservations.api";
 import { getGenresByReservation } from "../api/genres.api";
 import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
+import { useAuth } from "../auth/AuthContext";
 
 export default function Profile() {
   const [loading, setLoading] = useState(true);

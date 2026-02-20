@@ -21,22 +21,28 @@ const Footer = () => {
               <h3 className="mb-4 text-lg font-bold">Quick Links</h3>
               <ul className="space-y-2 text-sm text-white/80">
                 <li>
-                  <a href="#" className="transition-colors hover:text-accent">
+                  <Link
+                    to="/stall-map"
+                    className="transition-colors hover:text-accent"
+                  >
                     Exhibition Venue Map
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="transition-colors hover:text-accent">
-                    Vendor Terms & Conditions
-                  </a>
+                  </Link>
                 </li>
                 <li>
                   <Link
+                    to="/vendor-terms"
+                    className="transition-colors hover:text-accent"
+                  >
+                    Vendor Terms & Conditions
+                  </Link>
+                </li>
+                <li>
+                  {/* <Link
                     to="/login"
                     className="transition-colors hover:text-accent"
                   >
                     Employee Portal
-                  </Link>
+                  </Link> */}
                 </li>
               </ul>
             </div>
@@ -50,8 +56,7 @@ const Footer = () => {
           </div>
 
           <div className="pt-8 mt-12 text-xs text-center border-t text-white/60 border-white/10">
-            © {new Date().getFullYear()} Colombo International Bookfair. All
-            Rights Reserved.
+            © {new Date().getFullYear()} ExpoHub. All Rights Reserved.
           </div>
         </div>
       </div>
