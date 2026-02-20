@@ -92,12 +92,7 @@ export default function EditReservation() {
     };
   }, [id]);
 
-  // Determine disabled stalls (reserved by others) + highlight (mine)
-  // This depends on backend stall fields. We handle common possibilities:
-  // - stall.reserved === true
-  // - stall.isReserved === true
-  // - stall.reservationId exists
-  // - stall.reservedByReservationId exists
+
   const { disabledStallIds, highlightStallIds } = useMemo(() => {
     const mine = new Set(reservationStallIds);
     const disabled = [];
@@ -109,7 +104,6 @@ export default function EditReservation() {
         (typeof s.reservationId === "number" && s.reservationId > 0) ||
         (typeof s.reservedByReservationId === "number" && s.reservedByReservationId > 0);
 
-      // If reserved AND not mine => disabled
       if (isReserved && !mine.has(s.id)) disabled.push(s.id);
     }
 
@@ -119,7 +113,6 @@ export default function EditReservation() {
     };
   }, [stalls, reservationStallIds]);
 
-  // Toggle select with max 3 rule
   function onToggleSelect(stallId) {
     setError("");
 

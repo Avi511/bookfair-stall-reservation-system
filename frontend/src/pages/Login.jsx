@@ -77,11 +77,6 @@ export default function Login() {
       navigate(isEmployee ? "/employee/dashboard" : "/", { replace: true });
     } catch (error) {
       console.error("Login error:", error);
-
-      const message =
-        error.response?.data?.message || "Invalid email or password";
-
-      toast.error(message);
     } finally {
       setLoading(false);
     }
