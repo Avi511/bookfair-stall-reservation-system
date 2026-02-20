@@ -27,7 +27,10 @@ const toInputDate = (value) => {
 };
 
 const extractApiError = (e, fallback) =>
-  e?.response?.data?.message || e?.response?.data?.error || e?.message || fallback;
+  e?.response?.data?.message ||
+  e?.response?.data?.error ||
+  e?.message ||
+  fallback;
 
 export default function EmployeeEventsPage() {
   const [events, setEvents] = useState([]);
@@ -55,7 +58,8 @@ export default function EmployeeEventsPage() {
   }, []);
 
   const activeEvent = useMemo(
-    () => events.find((ev) => String(ev.status).toUpperCase() === "ACTIVE") || null,
+    () =>
+      events.find((ev) => String(ev.status).toUpperCase() === "ACTIVE") || null,
     [events],
   );
 
@@ -194,14 +198,18 @@ export default function EmployeeEventsPage() {
           </Link>
         </div>
 
-        <h1 className="text-2xl font-bold text-[var(--color-dark)]">Employee Event Management</h1>
+        <h1 className="text-2xl font-bold text-[var(--color-dark)]">
+          Employee Event Management
+        </h1>
         <p className="mt-1 text-sm text-gray-600">
-          Create, edit, activate, and inactivate events. Only one event can be active at a time.
+          Create, edit, activate, and inactivate events. Only one event can be
+          active at a time.
         </p>
 
         {activeEvent && (
           <div className="px-4 py-3 mt-4 text-sm text-blue-800 border border-blue-200 rounded-xl bg-blue-50">
-            Active event: <span className="font-semibold">{activeEvent.name}</span>
+            Active event:{" "}
+            <span className="font-semibold">{activeEvent.name}</span>
           </div>
         )}
 
@@ -209,51 +217,76 @@ export default function EmployeeEventsPage() {
 
         <div className="grid grid-cols-1 gap-6 mt-6 lg:grid-cols-3">
           <div className="lg:col-span-1">
-            <form onSubmit={onSubmit} className="p-4 bg-white border rounded-2xl">
-              <h2 className="text-lg font-semibold">{editingId ? "Edit Event" : "Create Event"}</h2>
+            <form
+              onSubmit={onSubmit}
+              className="p-4 bg-white border rounded-2xl"
+            >
+              <h2 className="text-lg font-semibold">
+                {editingId ? "Edit Event" : "Create Event"}
+              </h2>
               <div className="mt-3 space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Event Name</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Event Name
+                  </label>
                   <input
                     value={form.name}
-                    onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, name: e.target.value }))
+                    }
                     className="w-full px-3 py-2 mt-1 border rounded-xl"
-                    placeholder="Colombo Bookfair"
+                    placeholder="ExpoHub"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Year</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Year
+                  </label>
                   <input
                     type="number"
                     value={form.year}
-                    onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, year: e.target.value }))
+                    }
                     className="w-full px-3 py-2 mt-1 border rounded-xl"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Start Date</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Start Date
+                  </label>
                   <input
                     type="date"
                     value={form.startDate}
-                    onChange={(e) => setForm((p) => ({ ...p, startDate: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, startDate: e.target.value }))
+                    }
                     className="w-full px-3 py-2 mt-1 border rounded-xl"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">End Date</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    End Date
+                  </label>
                   <input
                     type="date"
                     value={form.endDate}
-                    onChange={(e) => setForm((p) => ({ ...p, endDate: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, endDate: e.target.value }))
+                    }
                     className="w-full px-3 py-2 mt-1 border rounded-xl"
                   />
                 </div>
                 {!editingId && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Initial Status</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Initial Status
+                    </label>
                     <select
                       value={form.status}
-                      onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, status: e.target.value }))
+                      }
                       className="w-full px-3 py-2 mt-1 border rounded-xl"
                     >
                       <option value="DRAFT">DRAFT</option>
@@ -270,7 +303,11 @@ export default function EmployeeEventsPage() {
                   disabled={saving}
                   className="px-4 py-2 font-semibold text-white rounded-xl bg-[var(--color-primary)] disabled:opacity-60"
                 >
-                  {saving ? "Saving..." : editingId ? "Update Event" : "Create Event"}
+                  {saving
+                    ? "Saving..."
+                    : editingId
+                      ? "Update Event"
+                      : "Create Event"}
                 </button>
                 {editingId && (
                   <button
@@ -291,15 +328,21 @@ export default function EmployeeEventsPage() {
                 <h2 className="text-lg font-semibold">Events</h2>
               </div>
               {loading ? (
-                <div className="p-4 text-sm text-gray-600">Loading events...</div>
+                <div className="p-4 text-sm text-gray-600">
+                  Loading events...
+                </div>
               ) : events.length === 0 ? (
-                <div className="p-4 text-sm text-gray-600">No events found.</div>
+                <div className="p-4 text-sm text-gray-600">
+                  No events found.
+                </div>
               ) : (
                 <div className="divide-y">
                   {events.map((event) => {
                     const status = String(event.status || "").toUpperCase();
                     const canActivate =
-                      status !== "ACTIVE" && status !== "ENDED" && (!activeEvent || activeEvent.id === event.id);
+                      status !== "ACTIVE" &&
+                      status !== "ENDED" &&
+                      (!activeEvent || activeEvent.id === event.id);
                     const canDeactivate = status === "ACTIVE";
                     const canEnd = status === "ACTIVE" || status === "INACTIVE";
 
@@ -307,12 +350,17 @@ export default function EmployeeEventsPage() {
                       <div key={event.id} className="p-4">
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div>
-                            <p className="font-semibold text-[var(--color-dark)]">{event.name}</p>
+                            <p className="font-semibold text-[var(--color-dark)]">
+                              {event.name}
+                            </p>
                             <p className="text-sm text-gray-600">
-                              {toInputDate(event.startDate)} to {toInputDate(event.endDate)} | {event.year}
+                              {toInputDate(event.startDate)} to{" "}
+                              {toInputDate(event.endDate)} | {event.year}
                             </p>
                             <p className="mt-1 text-xs">
-                              <span className="px-2 py-1 border rounded-full bg-gray-50">{status}</span>
+                              <span className="px-2 py-1 border rounded-full bg-gray-50">
+                                {status}
+                              </span>
                             </p>
                           </div>
                           <div className="flex flex-wrap gap-2">
