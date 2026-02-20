@@ -10,7 +10,7 @@ const Contact = () => {
         <h1 className="mt-3 text-4xl font-bold">Let&apos;s plan your stall</h1>
         <p className="mt-4 text-lg text-slate-600">
           Need help with registration or stall reservations? Reach out to the
-          Colombo International Bookfair organizing team.
+          ExpoHub organizing team.
         </p>
       </section>
 
@@ -21,7 +21,7 @@ const Contact = () => {
             <div className="mt-4 space-y-3 text-slate-600">
               <p>
                 <span className="font-semibold text-slate-900">Email:</span>{" "}
-                info@colombobookfair.lk
+                info@expohub.lk
               </p>
               <p>
                 <span className="font-semibold text-slate-900">Phone:</span> +94

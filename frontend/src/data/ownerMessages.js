@@ -1,7 +1,7 @@
 export const ownerMessages = [
   {
     id: 1,
-    text: "Welcome to the Colombo International Bookfair 2026 — see you at BMICH!",
+    text: "Welcome to ExpoHub 2026 — see you at BMICH!",
   },
   {
     id: 2,

@@ -4,6 +4,7 @@ import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import Home from "../pages/public/Home/Home";
 import About from "../pages/public/About/About";
 import Contact from "../pages/public/Contact/Contact";
+import VendorTerms from "../pages/public/VendorTerms/VendorTerms";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import ReserveStalls from "../pages/ReserveStalls";
@@ -28,6 +29,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/vendor-terms" element={<VendorTerms />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
