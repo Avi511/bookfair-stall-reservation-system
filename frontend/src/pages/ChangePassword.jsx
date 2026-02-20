@@ -71,6 +71,15 @@ export default function ChangePassword() {
     }
   };
 
+  const onForgotPassword = () => {
+    const normalizedEmail = email.trim();
+    if (normalizedEmail) {
+      navigate(`/forgot-password?email=${encodeURIComponent(normalizedEmail)}`);
+      return;
+    }
+    navigate("/forgot-password");
+  };
+
   return (
     <div className="max-w-xl px-4 py-8 mx-auto">
       <div className="p-6 bg-white border border-gray-200 shadow-sm rounded-2xl">
@@ -131,6 +140,14 @@ export default function ChangePassword() {
               className="px-4 py-2 text-sm font-semibold border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              disabled={loadingProfile}
+              className="px-4 py-2 text-sm font-semibold border rounded-lg border-slate-300 text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            >
+              Forgot Password
             </button>
             <button
               type="submit"
